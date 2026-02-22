@@ -4,138 +4,71 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>La Familia Team</title>
-
 <style>
-body {
-  margin: 0;
-  font-family: 'Segoe UI', sans-serif;
-  background: #0f1117;
-  color: white;
-}
-
-.navbar {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 20px 40px;
-  background: rgba(0,0,0,0.6);
-  backdrop-filter: blur(10px);
-  position: sticky;
-  top: 0;
-}
-
-.navbar a {
-  color: white;
-  text-decoration: none;
-  margin-left: 20px;
-  font-weight: 500;
-}
-
-.logo {
-  font-weight: bold;
-  font-size: 20px;
-  letter-spacing: 1px;
-}
-
-.hero {
-  height: 80vh;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  background: linear-gradient(135deg, #1c1f2a, #0f1117);
-  text-align: center;
-}
-
-.hero h1 {
-  font-size: 48px;
-  margin-bottom: 20px;
-}
-
-.hero p {
-  color: #aaa;
-  margin-bottom: 30px;
-}
-
-.btn {
-  padding: 12px 28px;
-  background: #ff2e63;
-  border-radius: 8px;
-  text-decoration: none;
-  color: white;
-  font-weight: bold;
-}
-
-.section {
-  padding: 60px 40px;
-  max-width: 1100px;
-  margin: auto;
-}
-
-.grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 20px;
-}
-
-.card {
-  background: #1c1f2a;
-  padding: 20px;
-  border-radius: 15px;
-  transition: 0.3s;
-}
-
-.card:hover {
-  transform: translateY(-5px);
-}
-
-footer {
-  text-align: center;
-  padding: 30px;
-  color: #777;
-}
+:root{--bg:#0f1117;--card:#1c1f2a;--muted:#a7adbb;--acc:#ff2e63;--line:#2a2f3d;}
+*{box-sizing:border-box}
+body{margin:0;font-family:'Segoe UI',sans-serif;background:var(--bg);color:#fff}
+.navbar{display:flex;justify-content:space-between;align-items:center;padding:18px 32px;background:rgba(0,0,0,.55);backdrop-filter:blur(10px);position:sticky;top:0;border-bottom:1px solid var(--line)}
+.logo{font-weight:800;letter-spacing:1px}
+.navbar a{color:#fff;text-decoration:none;margin-left:18px;font-weight:600;opacity:.9}
+.navbar a:hover{opacity:1}
+.hero{min-height:78vh;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:60px 18px;background:
+radial-gradient(900px 400px at 20% -10%, rgba(255,46,99,.22), transparent 60%),
+radial-gradient(900px 400px at 90% 0%, rgba(0,190,255,.14), transparent 55%),
+linear-gradient(135deg,#1c1f2a,#0f1117)}
+.hero h1{font-size:52px;margin:0 0 14px}
+.hero p{color:var(--muted);margin:0 0 26px;font-size:16px;max-width:720px}
+.btn{display:inline-block;padding:12px 26px;background:var(--acc);border-radius:10px;color:#fff;text-decoration:none;font-weight:800}
+.section{padding:56px 22px;max-width:1100px;margin:auto}
+.section h2{margin:0 0 16px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px}
+.card{background:rgba(28,31,42,.9);border:1px solid var(--line);border-radius:16px;padding:18px;transition:.2s}
+.card:hover{transform:translateY(-4px);border-color:rgba(255,46,99,.45)}
+.small{color:var(--muted);font-size:13px}
+.footer{text-align:center;padding:26px;color:#80879a;border-top:1px solid var(--line)}
+.pill{display:inline-block;padding:6px 10px;border:1px solid var(--line);border-radius:999px;color:var(--muted);font-size:12px;margin:0 8px 12px}
 </style>
-
 </head>
 <body>
 
-<div class="navbar">
+<header class="navbar">
   <div class="logo">LA FAMILIA TEAM</div>
-  <div>
-    <a href="#">Početna</a>
-    <a href="#">Garaža</a>
-  </div>
-</div>
+  <nav>
+    <a href="index.html">Početna</a>
+    <a href="garaza.html">Garaža</a>
+  </nav>
+</header>
 
-<div class="hero">
+<section class="hero">
+  <span class="pill">Digitalna garaža</span>
+  <span class="pill">Build log</span>
+  <span class="pill">Meet uspomene</span>
   <h1>Build. Drive. Repeat.</h1>
-  <p>Digitalna garaža naše ekipe.</p>
-  <a href="#" class="btn">Uđi u garažu</a>
-</div>
+  <p>Mjesto gdje svako ima svoj profil auta i upisuje šta je urađeno. Jednostavno, pregledno i uvijek ažurno.</p>
+  <a class="btn" href="garaza.html">Uđi u garažu</a>
+</section>
 
-<div class="section">
-  <h2>Naša Ekipa</h2>
+<section class="section">
+  <h2>Zadnji update-i</h2>
   <div class="grid">
-    <div class="card">
-      <h3>Audi A5 2014</h3>
-      <p>Vlasnik: Amar</p>
-    </div>
-
-    <div class="card">
-      <h3>Golf 6 GTI</h3>
-      <p>Vlasnik: Adnan</p>
-    </div>
-
-    <div class="card">
-      <h3>BMW E92</h3>
-      <p>Vlasnik: Mirza</p>
-    </div>
+    <a class="card" href="auto.html">
+      <div class="small">Amar • Audi A5 2014</div>
+      <h3 style="margin:10px 0 6px">Eibach -30mm</h3>
+      <div class="small">12.06.2026 • Auto stabilniji u krivinama.</div>
+    </a>
+    <a class="card" href="auto.html">
+      <div class="small">Adnan • Golf 6 GTI</div>
+      <h3 style="margin:10px 0 6px">Stage 1</h3>
+      <div class="small">05.06.2026 • Bolji odziv i poteg.</div>
+    </a>
+    <a class="card" href="auto.html">
+      <div class="small">Mirza • BMW E92</div>
+      <h3 style="margin:10px 0 6px">Felge 19”</h3>
+      <div class="small">01.06.2026 • Novi izgled, bolji stance.</div>
+    </a>
   </div>
-</div>
+</section>
 
-<footer>
-  © 2026 La Familia Team
-</footer>
-
+<footer class="footer">© 2026 La Familia Team</footer>
 </body>
 </html>
