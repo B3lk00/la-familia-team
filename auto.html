@@ -1,9 +1,39 @@
 <!DOCTYPE html>
 <html lang="bs">
 <head>
-  <meta charset="UTF-8">
-  <title>Profil Auta</title>
-  <link rel="stylesheet" href="assets/css/style.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Audi A5 2014 | La Familia Team</title>
+<style>
+:root{--bg:#0f1117;--card:#1c1f2a;--muted:#a7adbb;--acc:#ff2e63;--line:#2a2f3d;}
+*{box-sizing:border-box}
+body{margin:0;font-family:'Segoe UI',sans-serif;background:var(--bg);color:#fff}
+.navbar{display:flex;justify-content:space-between;align-items:center;padding:18px 32px;background:rgba(0,0,0,.55);backdrop-filter:blur(10px);position:sticky;top:0;border-bottom:1px solid var(--line)}
+.logo{font-weight:800;letter-spacing:1px}
+.navbar a{color:#fff;text-decoration:none;margin-left:18px;font-weight:600;opacity:.9}
+.navbar a:hover{opacity:1}
+.wrap{max-width:1100px;margin:auto;padding:22px}
+.hero{
+  border:1px solid var(--line);border-radius:18px;overflow:hidden;
+  background: linear-gradient(135deg, rgba(255,46,99,.15), rgba(0,190,255,.10)), #141827;
+}
+.cover{height:320px;background:linear-gradient(135deg,#2a2f3d,#141827)}
+.herotxt{padding:14px 16px}
+.small{color:var(--muted);font-size:13px}
+.specs{margin-top:14px;display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:10px}
+.spec{border:1px solid var(--line);border-radius:16px;padding:12px;background:rgba(28,31,42,.75)}
+.spec .k{color:var(--muted);font-size:12px}
+.spec .v{margin-top:6px;font-weight:700}
+.section{margin-top:22px}
+.card{border:1px solid var(--line);border-radius:16px;padding:14px;background:rgba(28,31,42,.75)}
+.updates{display:grid;gap:10px}
+.update h3{margin:6px 0 4px}
+.update p{margin:8px 0 0;color:#d7dbe6}
+.badges{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.badge{border:1px solid var(--line);border-radius:999px;padding:6px 10px;color:var(--muted);font-size:12px}
+.btn{display:inline-block;padding:10px 14px;border-radius:10px;background:var(--acc);color:#fff;text-decoration:none;font-weight:800;font-size:13px}
+.footer{text-align:center;padding:26px;color:#80879a;border-top:1px solid var(--line);margin-top:30px}
+</style>
 </head>
 <body>
 
@@ -15,40 +45,55 @@
   </nav>
 </header>
 
-<section class="auto-hero">
-  <h1>Audi A5 2014</h1>
-  <p>Vlasnik: Amar H.</p>
-</section>
+<div class="wrap">
+  <a class="small" href="garaza.html">← nazad na garažu</a>
 
-<section class="specs">
-  <div class="spec-box">
-    <span>Motor</span>
-    <strong>2.0 TDI</strong>
-  </div>
-  <div class="spec-box">
-    <span>Snaga</span>
-    <strong>210 KS</strong>
-  </div>
-  <div class="spec-box">
-    <span>Mjenjač</span>
-    <strong>S-Tronic</strong>
-  </div>
-</section>
+  <section class="hero" style="margin-top:10px">
+    <div class="cover"></div>
+    <div class="herotxt">
+      <h1 style="margin:0 0 6px">Audi A5 Facelift (2014)</h1>
+      <div class="small">Vlasnik: Amar • Sarajevo</div>
+      <div class="badges">
+        <span class="badge">Stage 1</span>
+        <span class="badge">S-tronic</span>
+        <span class="badge">2.0 TDI</span>
+      </div>
+    </div>
+  </section>
 
-<section class="section">
-  <h2>Build Log</h2>
+  <section class="specs">
+    <div class="spec"><div class="k">Motor</div><div class="v">2.0 TDI CR</div></div>
+    <div class="spec"><div class="k">Snaga</div><div class="v">210 KS</div></div>
+    <div class="spec"><div class="k">Mjenjač</div><div class="v">S-tronic</div></div>
+    <div class="spec"><div class="k">Setup</div><div class="v">Ovjes -30mm</div></div>
+  </section>
 
-  <div class="update">
-    <span>12.06.2026</span>
-    <h3>Eibach -30mm</h3>
-    <p>Auto stabilniji u krivinama.</p>
-  </div>
+  <section class="section">
+    <div class="card">
+      <h2 style="margin:0 0 6px">Build log</h2>
+      <div class="small">Update-i idu od najnovijeg ka starijim.</div>
+    </div>
 
-</section>
+    <div class="updates" style="margin-top:10px">
+      <div class="card update">
+        <div class="small">12.06.2026</div>
+        <h3>Eibach opruge (-30mm)</h3>
+        <p>Auto stabilniji u krivinama, stance bolji, udobnost okej.</p>
+      </div>
 
-<footer>
-  © 2026 La Familia Team
-</footer>
+      <div class="card update">
+        <div class="small">15.05.2026</div>
+        <h3>Stage 1 + EGR off</h3>
+        <p>Bolji odziv, jači poteg, potrošnja malo niža u normalnoj vožnji.</p>
+      </div>
+    </div>
 
+    <div style="margin-top:14px">
+      <a class="btn" href="#">Dodaj update (kasnije)</a>
+    </div>
+  </section>
+</div>
+
+<footer class="footer">© 2026 La Familia Team</footer>
 </body>
 </html>
