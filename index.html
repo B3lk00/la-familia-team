@@ -1,33 +1,137 @@
 <!DOCTYPE html>
 <html lang="bs">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>La Familia Team</title>
-  <link rel="stylesheet" href="assets/css/style.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>La Familia Team</title>
+
+<style>
+body {
+  margin: 0;
+  font-family: 'Segoe UI', sans-serif;
+  background: #0f1117;
+  color: white;
+}
+
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 40px;
+  background: rgba(0,0,0,0.6);
+  backdrop-filter: blur(10px);
+  position: sticky;
+  top: 0;
+}
+
+.navbar a {
+  color: white;
+  text-decoration: none;
+  margin-left: 20px;
+  font-weight: 500;
+}
+
+.logo {
+  font-weight: bold;
+  font-size: 20px;
+  letter-spacing: 1px;
+}
+
+.hero {
+  height: 80vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background: linear-gradient(135deg, #1c1f2a, #0f1117);
+  text-align: center;
+}
+
+.hero h1 {
+  font-size: 48px;
+  margin-bottom: 20px;
+}
+
+.hero p {
+  color: #aaa;
+  margin-bottom: 30px;
+}
+
+.btn {
+  padding: 12px 28px;
+  background: #ff2e63;
+  border-radius: 8px;
+  text-decoration: none;
+  color: white;
+  font-weight: bold;
+}
+
+.section {
+  padding: 60px 40px;
+  max-width: 1100px;
+  margin: auto;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 20px;
+}
+
+.card {
+  background: #1c1f2a;
+  padding: 20px;
+  border-radius: 15px;
+  transition: 0.3s;
+}
+
+.card:hover {
+  transform: translateY(-5px);
+}
+
+footer {
+  text-align: center;
+  padding: 30px;
+  color: #777;
+}
+</style>
+
 </head>
 <body>
 
-<header class="navbar">
+<div class="navbar">
   <div class="logo">LA FAMILIA TEAM</div>
-  <nav>
-    <a href="index.html">Početna</a>
-    <a href="garaza.html">Garaža</a>
-  </nav>
-</header>
+  <div>
+    <a href="#">Početna</a>
+    <a href="#">Garaža</a>
+  </div>
+</div>
 
-<section class="hero">
+<div class="hero">
   <h1>Build. Drive. Repeat.</h1>
   <p>Digitalna garaža naše ekipe.</p>
-  <a href="garaza.html" class="btn">Uđi u garažu</a>
-</section>
+  <a href="#" class="btn">Uđi u garažu</a>
+</div>
 
-<section class="section">
-  <h2>Zadnji Update</h2>
-  <div class="card">
-    <p>Ovdje će automatski dolaziti zadnji build update.</p>
+<div class="section">
+  <h2>Naša Ekipa</h2>
+  <div class="grid">
+    <div class="card">
+      <h3>Audi A5 2014</h3>
+      <p>Vlasnik: Amar</p>
+    </div>
+
+    <div class="card">
+      <h3>Golf 6 GTI</h3>
+      <p>Vlasnik: Adnan</p>
+    </div>
+
+    <div class="card">
+      <h3>BMW E92</h3>
+      <p>Vlasnik: Mirza</p>
+    </div>
   </div>
-</section>
+</div>
 
 <footer>
   © 2026 La Familia Team
