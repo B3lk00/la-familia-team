@@ -49,16 +49,33 @@ body{
   position:absolute;
   width:100%;
   height:100%;
-  background-size:cover;
-  background-position:center;
   opacity:0;
   transition:opacity 1.2s ease-in-out;
-  transform:scale(1.05);
+}
+.slide.active{ opacity:1; }
+
+/* blur pozadina */
+.slide::before{
+  content:"";
+  position:absolute;
+  inset:0;
+  background-image:var(--img);
+  background-size:cover;
+  background-position:center;
+  filter:blur(18px);
+  transform:scale(1.25);
+  opacity:.35;
 }
 
-.slide.active{
-  opacity:1;
-  animation:zoom 8s ease forwards;
+/* glavna slika - cijela */
+.slide::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  background-image:var(--img);
+  background-size:contain;
+  background-position:center;
+  background-repeat:no-repeat;
 }
 
 @keyframes zoom{
@@ -148,7 +165,7 @@ const slider = document.getElementById("slider");
 sliderImages.forEach((img, index) => {
   const div = document.createElement("div");
   div.className = "slide";
-  div.style.backgroundImage = `url('${img}')`;
+  div.style.setProperty("--img", `url('${img}')`); // bitno
   if(index === 0) div.classList.add("active");
   slider.appendChild(div);
 });
