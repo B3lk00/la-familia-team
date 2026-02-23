@@ -6,25 +6,42 @@
 <title>La Familia Team</title>
 
 <style>
-:root{--bg:#0f1117;--line:#2a2f3d;--muted:#a7adbb;--acc:#ff2e63;}
+:root{
+  --bg:#0f1117;
+  --muted:#b0b6c4;
+  --accent:#ff2e63;
+}
+
 *{box-sizing:border-box}
-body{margin:0;font-family:'Segoe UI',sans-serif;background:var(--bg);color:#fff}
+body{
+  margin:0;
+  font-family:'Segoe UI',sans-serif;
+  background:var(--bg);
+  color:white;
+}
 
 .navbar{
-  display:flex;justify-content:space-between;align-items:center;
-  padding:18px 32px;background:rgba(0,0,0,.55);
-  backdrop-filter:blur(10px);position:fixed;width:100%;z-index:10;
+  position:fixed;
+  width:100%;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:18px 40px;
+  background:rgba(0,0,0,0.5);
+  backdrop-filter:blur(10px);
+  z-index:10;
 }
-.logo{font-weight:800}
-.navbar a{color:#fff;text-decoration:none;margin-left:18px;font-weight:600}
+
+.navbar a{
+  color:white;
+  text-decoration:none;
+  margin-left:20px;
+  font-weight:600;
+}
 
 .hero{
   height:100vh;
   position:relative;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  text-align:center;
   overflow:hidden;
 }
 
@@ -34,61 +51,72 @@ body{margin:0;font-family:'Segoe UI',sans-serif;background:var(--bg);color:#fff}
   height:100%;
   background-size:cover;
   background-position:center;
-  transition:opacity 1s ease-in-out;
   opacity:0;
+  transition:opacity 1.2s ease-in-out;
+  transform:scale(1.05);
 }
 
 .slide.active{
   opacity:1;
+  animation:zoom 8s ease forwards;
+}
+
+@keyframes zoom{
+  from{transform:scale(1.05);}
+  to{transform:scale(1.15);}
 }
 
 .overlay{
   position:absolute;
   width:100%;
   height:100%;
-  background:linear-gradient(to bottom, rgba(0,0,0,.4), rgba(0,0,0,.7));
+  background:linear-gradient(to bottom, rgba(0,0,0,0.4), rgba(0,0,0,0.8));
 }
 
 .hero-content{
-  position:relative;
+  position:absolute;
+  top:50%;
+  left:50%;
+  transform:translate(-50%,-50%);
+  text-align:center;
   z-index:5;
 }
 
 .hero h1{
-  font-size:56px;
-  margin-bottom:20px;
+  font-size:60px;
+  margin-bottom:15px;
 }
 
 .hero p{
   color:var(--muted);
   margin-bottom:30px;
+  font-size:18px;
 }
 
 .btn{
-  padding:12px 26px;
-  background:var(--acc);
+  padding:14px 30px;
+  background:var(--accent);
   border-radius:10px;
   color:white;
   text-decoration:none;
   font-weight:800;
 }
 
-.footer{
+footer{
   text-align:center;
   padding:30px;
   color:#777;
-  border-top:1px solid var(--line);
 }
 </style>
 </head>
 <body>
 
 <header class="navbar">
-  <div class="logo">LA FAMILIA TEAM</div>
-  <nav>
+  <div><strong>LA FAMILIA TEAM</strong></div>
+  <div>
     <a href="index.html">Početna</a>
     <a href="garaza.html">Garaža</a>
-  </nav>
+  </div>
 </header>
 
 <section class="hero">
@@ -97,45 +125,40 @@ body{margin:0;font-family:'Segoe UI',sans-serif;background:var(--bg);color:#fff}
 
   <div class="hero-content">
     <h1>Build. Drive. Repeat.</h1>
-    <p>Digitalna garaža naše ekipe</p>
+    <p>Naša digitalna garaža.</p>
     <a href="garaza.html" class="btn">Uđi u garažu</a>
   </div>
 </section>
 
-<footer class="footer">
+<footer>
 © 2026 La Familia Team
 </footer>
 
-<script src="cars.js"></script>
 <script>
+// OVDJE SAMO DODAJEŠ SLIKE
+const sliderImages = [
+  "assets/slider/1.jpg",
+  "assets/slider/2.jpg",
+  "assets/slider/3.jpg"
+];
+
 const slider = document.getElementById("slider");
-const cars = window.CARS || [];
 
-// uzmi samo auta koja imaju cover sliku
-const carsWithImages = cars.filter(c => c.cover);
+sliderImages.forEach((img, index) => {
+  const div = document.createElement("div");
+  div.className = "slide";
+  div.style.backgroundImage = `url('${img}')`;
+  if(index === 0) div.classList.add("active");
+  slider.appendChild(div);
+});
 
-if(carsWithImages.length > 0){
-  carsWithImages.forEach((car, index) => {
-    const div = document.createElement("div");
-    div.className = "slide";
-    div.style.backgroundImage = `url('${car.cover}')`;
-    if(index === 0) div.classList.add("active");
-
-    div.onclick = () => {
-      window.location.href = "auto.html?id=" + car.id;
-    };
-
-    slider.appendChild(div);
-  });
-
-  let current = 0;
-  setInterval(() => {
-    const slides = document.querySelectorAll(".slide");
-    slides[current].classList.remove("active");
-    current = (current + 1) % slides.length;
-    slides[current].classList.add("active");
-  }, 4000);
-}
+let current = 0;
+setInterval(() => {
+  const slides = document.querySelectorAll(".slide");
+  slides[current].classList.remove("active");
+  current = (current + 1) % slides.length;
+  slides[current].classList.add("active");
+}, 5000);
 </script>
 
 </body>
