@@ -1,1 +1,391 @@
+<!DOCTYPE html>
+<html lang="bs">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Panel | La Familia</title>
+<style>
+:root{--bg:#0f1117;--card:#1c1f2a;--line:#2a2f3d;--muted:#a7adbb;--acc:#ff2e63;}
+*{box-sizing:border-box}
+body{margin:0;font-family:'Segoe UI',sans-serif;background:var(--bg);color:#fff}
+.navbar{display:flex;justify-content:space-between;align-items:center;padding:18px 32px;background:rgba(0,0,0,.55);backdrop-filter:blur(10px);position:sticky;top:0;border-bottom:1px solid var(--line)}
+.logo{font-weight:800;letter-spacing:1px}
+.navbar a, .navbar button{color:#fff;text-decoration:none;margin-left:18px;font-weight:600;opacity:.9;background:none;border:0;cursor:pointer}
+.navbar a:hover, .navbar button:hover{opacity:1}
 
+.wrap{max-width:1100px;margin:auto;padding:22px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:14px}
+.card{background:rgba(28,31,42,.85);border:1px solid var(--line);border-radius:16px;padding:14px}
+h1{margin:0 0 8px}
+h2{margin:0 0 10px}
+.small{color:var(--muted);font-size:13px}
+input, textarea{width:100%;padding:12px 14px;border-radius:12px;border:1px solid var(--line);background:#0b0d12;color:#fff}
+textarea{min-height:92px;resize:vertical}
+.btn{display:inline-block;padding:10px 14px;border-radius:12px;border:0;background:var(--acc);color:#fff;font-weight:800;cursor:pointer}
+.btn:disabled{opacity:.6;cursor:not-allowed}
+hr{border:0;border-top:1px solid var(--line);margin:14px 0}
+.cover{
+  height:220px;border-radius:14px;border:1px solid var(--line);
+  background:#0f1118 center/cover no-repeat;
+}
+.badge{display:inline-block;padding:6px 10px;border:1px solid var(--line);border-radius:999px;color:var(--muted);font-size:12px;margin:8px 6px 0 0}
+.updates{display:grid;gap:10px;margin-top:10px}
+.update{border:1px solid var(--line);border-radius:14px;padding:12px;background:rgba(17,19,26,.55)}
+.uimg{width:100%;height:200px;object-fit:cover;border-radius:12px;margin-top:10px;border:1px solid var(--line)}
+.photos{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px;margin-top:10px}
+.photo{height:160px;border-radius:14px;border:1px solid var(--line);background:#0f1118 center/cover no-repeat;position:relative;overflow:hidden}
+.del{
+  position:absolute;right:8px;top:8px;
+  background:rgba(0,0,0,.55);border:1px solid var(--line);
+  color:#fff;border-radius:10px;padding:6px 8px;font-weight:800;cursor:pointer
+}
+</style>
+</head>
+<body>
+
+<header class="navbar">
+  <div class="logo">LA FAMILIA TEAM</div>
+  <nav>
+    <a href="index.html">Početna</a>
+    <a href="garaza.html">Garaža</a>
+    <a href="panel.html">Panel</a>
+    <button onclick="logout()">Logout</button>
+  </nav>
+</header>
+
+<div class="wrap">
+  <h1>Panel</h1>
+  <div id="who" class="small">Učitavam…</div>
+
+  <div class="grid" style="margin-top:14px">
+
+    <!-- AUTO + COVER -->
+    <div class="card">
+      <h2>Moj auto</h2>
+      <div id="carTitle" class="small">—</div>
+      <div id="cover" class="cover" style="margin-top:10px"></div>
+
+      <div style="margin-top:10px">
+        <div class="small">Cover slika (prikazuje se u garaži)</div>
+        <input id="coverFile" type="file" accept="image/*" />
+        <button class="btn" style="margin-top:10px" onclick="uploadCover()">Upload cover</button>
+        <div id="coverMsg" class="small" style="margin-top:8px"></div>
+      </div>
+
+      <hr />
+
+      <div class="small">Brzi edit (opciono)</div>
+      <div style="display:grid; gap:10px; margin-top:10px">
+        <input id="engine" placeholder="Motor (npr. 2.0 TDI CR)" />
+        <input id="transmission" placeholder="Mjenjač (npr. S-tronic)" />
+        <input id="power_hp" placeholder="Snaga (KS) (npr. 210)" />
+        <input id="setup" placeholder="Setup (npr. Ovjes -30mm)" />
+        <input id="location" placeholder="Lokacija (npr. Sarajevo)" />
+        <button class="btn" onclick="saveCarInfo()">Sačuvaj</button>
+        <div id="carMsg" class="small"></div>
+      </div>
+    </div>
+
+    <!-- DODAJ UPDATE -->
+    <div class="card">
+      <h2>Dodaj build update</h2>
+      <div style="display:grid; gap:10px">
+        <input id="u_date" type="date" />
+        <input id="u_title" placeholder="Naslov (npr. Eibach -30mm)" />
+        <textarea id="u_body" placeholder="Kratak opis (1–3 rečenice)"></textarea>
+        <div class="small">Slika (opciono)</div>
+        <input id="u_file" type="file" accept="image/*" />
+        <button class="btn" onclick="addUpdate()">Dodaj update</button>
+        <div id="u_msg" class="small"></div>
+      </div>
+
+      <hr />
+      <h2>Moji update-i</h2>
+      <div id="updates" class="updates"></div>
+    </div>
+
+    <!-- GALERIJA -->
+    <div class="card">
+      <h2>Galerija (više slika)</h2>
+      <div class="small">Možeš odjednom izabrati više slika.</div>
+      <input id="g_files" type="file" accept="image/*" multiple style="margin-top:10px" />
+      <button class="btn" style="margin-top:10px" onclick="uploadGallery()">Upload u galeriju</button>
+      <div id="g_msg" class="small" style="margin-top:8px"></div>
+
+      <div id="gallery" class="photos"></div>
+    </div>
+
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase.js"></script>
+<script src="auth-guard.js"></script>
+<script>
+let session = null;
+let me = null;
+let myCar = null;
+
+function safeNum(v){
+  const n = parseInt(v, 10);
+  return Number.isFinite(n) ? n : null;
+}
+
+async function logout(){
+  await window.sb.auth.signOut();
+  window.location.href = "login.html";
+}
+
+async function init(){
+  session = await window.requireAuth();
+  if(!session) return;
+
+  document.getElementById("who").textContent = `Ulogovan: ${session.user.email}`;
+
+  // učitaj moj profile
+  const { data: prof, error: pe } = await window.sb
+    .from("profiles")
+    .select("id, display_name, role")
+    .eq("id", session.user.id)
+    .single();
+
+  if(pe){ alert(pe.message); return; }
+  me = prof;
+
+  // pronađi moj auto (owner_id = ja)
+  const { data: car, error: ce } = await window.sb
+    .from("cars")
+    .select("*")
+    .eq("owner_id", me.id)
+    .single();
+
+  if(ce){
+    document.getElementById("carTitle").textContent = "Nema auta dodijeljenog ovom korisniku. (Admin treba dodati auto i owner_id).";
+    return;
+  }
+
+  myCar = car;
+  renderCarCard();
+  await loadUpdates();
+  await loadGallery();
+}
+
+function renderCarCard(){
+  document.getElementById("carTitle").textContent = `${myCar.make} ${myCar.model} (${myCar.year}) • ${me.display_name}`;
+  const cover = document.getElementById("cover");
+  if(myCar.cover_url) cover.style.backgroundImage = `url('${myCar.cover_url}')`;
+
+  document.getElementById("engine").value = myCar.engine || "";
+  document.getElementById("transmission").value = myCar.transmission || "";
+  document.getElementById("power_hp").value = myCar.power_hp ?? "";
+  document.getElementById("setup").value = myCar.setup || "";
+  document.getElementById("location").value = myCar.location || "";
+}
+
+async function saveCarInfo(){
+  const msg = document.getElementById("carMsg");
+  msg.textContent = "";
+
+  const payload = {
+    engine: document.getElementById("engine").value.trim() || null,
+    transmission: document.getElementById("transmission").value.trim() || null,
+    power_hp: safeNum(document.getElementById("power_hp").value),
+    setup: document.getElementById("setup").value.trim() || null,
+    location: document.getElementById("location").value.trim() || null,
+  };
+
+  const { error } = await window.sb.from("cars").update(payload).eq("id", myCar.id);
+  if(error){ msg.textContent = "Greška: " + error.message; return; }
+
+  msg.textContent = "Sačuvano ✅";
+  // refresh lokalno
+  myCar = { ...myCar, ...payload };
+}
+
+async function uploadToStorage(file, path){
+  // unique name
+  const ext = file.name.split(".").pop() || "jpg";
+  const fullPath = `${path}/${Date.now()}-${Math.random().toString(16).slice(2)}.${ext}`;
+
+  const { error: upErr } = await window.sb.storage.from("car-images").upload(fullPath, file, {
+    cacheControl: "3600",
+    upsert: false
+  });
+  if(upErr) throw upErr;
+
+  const { data } = window.sb.storage.from("car-images").getPublicUrl(fullPath);
+  return data.publicUrl;
+}
+
+async function uploadCover(){
+  const msg = document.getElementById("coverMsg");
+  msg.textContent = "";
+
+  const file = document.getElementById("coverFile").files[0];
+  if(!file){ msg.textContent = "Izaberi sliku prvo."; return; }
+
+  try{
+    const url = await uploadToStorage(file, `covers/${myCar.id}`);
+    const { error } = await window.sb.from("cars").update({ cover_url: url }).eq("id", myCar.id);
+    if(error) throw error;
+
+    myCar.cover_url = url;
+    document.getElementById("cover").style.backgroundImage = `url('${url}')`;
+    msg.textContent = "Cover postavljen ✅";
+  }catch(e){
+    msg.textContent = "Greška: " + e.message;
+  }
+}
+
+async function addUpdate(){
+  const msg = document.getElementById("u_msg");
+  msg.textContent = "";
+
+  const date = document.getElementById("u_date").value;
+  const title = document.getElementById("u_title").value.trim();
+  const body = document.getElementById("u_body").value.trim();
+  const file = document.getElementById("u_file").files[0];
+
+  if(!date || !title){
+    msg.textContent = "Datum i naslov su obavezni.";
+    return;
+  }
+
+  try{
+    let image_url = null;
+    if(file){
+      image_url = await uploadToStorage(file, `updates/${myCar.id}`);
+    }
+
+    const { error } = await window.sb.from("updates").insert({
+      car_id: myCar.id,
+      date,
+      title,
+      body: body || null,
+      image_url
+    });
+
+    if(error) throw error;
+
+    document.getElementById("u_title").value = "";
+    document.getElementById("u_body").value = "";
+    document.getElementById("u_file").value = "";
+    msg.textContent = "Update dodan ✅";
+
+    await loadUpdates();
+  }catch(e){
+    msg.textContent = "Greška: " + e.message;
+  }
+}
+
+async function loadUpdates(){
+  const root = document.getElementById("updates");
+  root.innerHTML = `<div class="small">Učitavam…</div>`;
+
+  const { data, error } = await window.sb
+    .from("updates")
+    .select("*")
+    .eq("car_id", myCar.id)
+    .order("date", { ascending: false });
+
+  if(error){
+    root.innerHTML = `<div class="small">Greška: ${error.message}</div>`;
+    return;
+  }
+
+  if(!data || data.length === 0){
+    root.innerHTML = `<div class="small">Nema update-a još.</div>`;
+    return;
+  }
+
+  root.innerHTML = data.map(u => `
+    <div class="update">
+      <div class="small">${u.date}</div>
+      <strong>${escapeHtml(u.title)}</strong>
+      ${u.body ? `<div class="small" style="margin-top:6px">${escapeHtml(u.body)}</div>` : ""}
+      ${u.image_url ? `<img class="uimg" src="${u.image_url}" alt="">` : ""}
+      <div style="margin-top:10px">
+        <button class="btn" style="background:#222;border:1px solid var(--line)" onclick="deleteUpdate('${u.id}')">Obriši</button>
+      </div>
+    </div>
+  `).join("");
+}
+
+async function deleteUpdate(id){
+  if(!confirm("Obrisati ovaj update?")) return;
+  const { error } = await window.sb.from("updates").delete().eq("id", id);
+  if(error){ alert(error.message); return; }
+  await loadUpdates();
+}
+
+async function uploadGallery(){
+  const msg = document.getElementById("g_msg");
+  msg.textContent = "";
+
+  const files = Array.from(document.getElementById("g_files").files || []);
+  if(files.length === 0){ msg.textContent = "Izaberi barem jednu sliku."; return; }
+
+  msg.textContent = "Uploadujem…";
+
+  try{
+    for(const f of files){
+      const url = await uploadToStorage(f, `gallery/${myCar.id}`);
+      const { error } = await window.sb.from("gallery_images").insert({
+        car_id: myCar.id,
+        url,
+        caption: null
+      });
+      if(error) throw error;
+    }
+
+    document.getElementById("g_files").value = "";
+    msg.textContent = "Dodano u galeriju ✅";
+    await loadGallery();
+  }catch(e){
+    msg.textContent = "Greška: " + e.message;
+  }
+}
+
+async function loadGallery(){
+  const root = document.getElementById("gallery");
+  root.innerHTML = "";
+
+  const { data, error } = await window.sb
+    .from("gallery_images")
+    .select("*")
+    .eq("car_id", myCar.id)
+    .order("created_at", { ascending: false });
+
+  if(error){
+    root.innerHTML = `<div class="small">Greška: ${error.message}</div>`;
+    return;
+  }
+
+  if(!data || data.length === 0){
+    root.innerHTML = `<div class="small">Galerija je prazna.</div>`;
+    return;
+  }
+
+  root.innerHTML = data.map(p => `
+    <div class="photo" style="background-image:url('${p.url}')">
+      <button class="del" title="Obriši" onclick="deletePhoto('${p.id}')">×</button>
+    </div>
+  `).join("");
+}
+
+async function deletePhoto(id){
+  if(!confirm("Obrisati sliku iz galerije?")) return;
+  const { error } = await window.sb.from("gallery_images").delete().eq("id", id);
+  if(error){ alert(error.message); return; }
+  await loadGallery();
+}
+
+function escapeHtml(s){
+  return String(s ?? "").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;");
+}
+
+init();
+</script>
+
+</body>
+</html>
