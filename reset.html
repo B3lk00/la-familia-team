@@ -36,32 +36,55 @@ input{width:100%;padding:12px 14px;border-radius:12px;border:1px solid var(--lin
 <script src="supabase.js"></script>
 
 <script>
-async function setNewPassword(){
-  const msg = document.getElementById("msg");
-  msg.textContent = "";
+const msg = document.getElementById("msg");
 
+// ✅ OVO JE KLJUČNO
+async function initRecovery(){
+  const { data, error } =
+    await window.sb.auth.getSessionFromUrl({
+      storeSession: true
+    });
+
+  if(error){
+    msg.textContent =
+      "Reset link nije validan ili je istekao.";
+    return;
+  }
+}
+
+initRecovery();
+
+async function setNewPassword(){
   const pw = document.getElementById("pw").value;
   const pw2 = document.getElementById("pw2").value;
 
   if(!pw || pw.length < 6){
-    msg.textContent = "Lozinka mora imati barem 6 karaktera.";
+    msg.textContent="Lozinka mora imati min 6 karaktera.";
     return;
   }
+
   if(pw !== pw2){
-    msg.textContent = "Lozinke se ne poklapaju.";
+    msg.textContent="Lozinke se ne poklapaju.";
     return;
   }
 
-  msg.textContent = "Spremam…";
+  msg.textContent="Spremam novu lozinku...";
 
-  const { error } = await window.sb.auth.updateUser({ password: pw });
+  const { error } =
+    await window.sb.auth.updateUser({
+      password: pw
+    });
+
   if(error){
-    msg.textContent = "Greška: " + error.message;
+    msg.textContent="Greška: "+error.message;
     return;
   }
 
-  msg.textContent = "Lozinka promijenjena ✅ Sad se možeš prijaviti.";
-  setTimeout(()=>{ window.location.href = "login.html"; }, 1200);
+  msg.textContent="✅ Lozinka promijenjena!";
+
+  setTimeout(()=>{
+    window.location.href="login.html";
+  },1500);
 }
 </script>
 
