@@ -15,12 +15,26 @@ body{margin:0;font-family:'Segoe UI',sans-serif;background:var(--bg);color:#fff}
 .section{padding:40px 22px;max-width:1100px;margin:auto}
 .toprow{display:flex;justify-content:space-between;align-items:end;gap:14px;flex-wrap:wrap}
 .small{color:var(--muted);font-size:13px}
-.grid{margin-top:18px;display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px}
-.card{background:rgba(28,31,42,.9);border:1px solid var(--line);border-radius:16px;overflow:hidden;transition:.2s}
+.grid{margin-top:18px;display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:16px}
+.card{
+  background:rgba(28,31,42,.9);
+  border:1px solid var(--line);
+  border-radius:18px;
+  overflow:hidden;
+  transition:.2s;
+  min-height:260px;
+  display:flex;
+  flex-direction:column;
+}
 .card:hover{transform:translateY(-4px);border-color:rgba(255,46,99,.45)}
-.thumb{height:160px;background:linear-gradient(135deg,#2a2f3d,#141827)}
-.cardbody{padding:14px}
-.btn{display:inline-block;margin-top:10px;padding:10px 14px;border-radius:10px;background:var(--acc);color:#fff;text-decoration:none;font-weight:800;font-size:13px}
+.thumb{
+  height:180px;
+  background:linear-gradient(135deg,#2a2f3d,#141827);
+  background-size:cover;
+  background-position:center;
+}
+.cardbody{padding:14px;display:flex;flex-direction:column;gap:6px;flex:1}
+.btn{align-self:flex-start;margin-top:auto;padding:10px 14px;border-radius:12px;background:var(--acc);color:#fff;text-decoration:none;font-weight:800;font-size:13px}
 .search{padding:12px 14px;border-radius:12px;border:1px solid var(--line);background:#0b0d12;color:#fff;min-width:260px}
 .footer{text-align:center;padding:26px;color:#80879a;border-top:1px solid var(--line);margin-top:30px}
 </style>
@@ -32,6 +46,7 @@ body{margin:0;font-family:'Segoe UI',sans-serif;background:var(--bg);color:#fff}
   <nav>
     <a href="index.html">Početna</a>
     <a href="garaza.html">Garaža</a>
+    <a href="login.html">Login</a>
   </nav>
 </header>
 
@@ -41,55 +56,76 @@ body{margin:0;font-family:'Segoe UI',sans-serif;background:var(--bg);color:#fff}
       <h1 style="margin:0 0 6px">Garaža</h1>
       <div class="small">Svi auti iz ekipe — klikni da vidiš build log.</div>
     </div>
-    <input class="search" placeholder="Pretraga (npr. Audi, Golf, 2014)…" oninput="filterCars(this.value)">
+    <input id="q" class="search" placeholder="Pretraga (npr. Audi, Golf, 2014)…" oninput="render()">
   </div>
 
-  <div id="cars" class="grid">
-    <!-- Kartice -->
-    <div class="card" data-search="amar audi a5 2014 facelift">
-      <div class="thumb"></div>
-      <div class="cardbody">
-        <div class="small">Amar</div>
-        <strong>Audi A5 Facelift</strong>
-        <div class="small">2014 • 2.0 TDI • S-tronic</div>
-        <a class="btn" href="auto.html">Pogledaj</a>
-      </div>
-    </div>
-
-    <div class="card" data-search="adnan golf 6 gti 2011">
-      <div class="thumb"></div>
-      <div class="cardbody">
-        <div class="small">Adnan</div>
-        <strong>Golf 6 GTI</strong>
-        <div class="small">2011 • 2.0 TSI • DSG</div>
-        <a class="btn" href="auto.html">Pogledaj</a>
-      </div>
-    </div>
-
-    <div class="card" data-search="mirza bmw e92 2010">
-      <div class="thumb"></div>
-      <div class="cardbody">
-        <div class="small">Mirza</div>
-        <strong>BMW E92</strong>
-        <div class="small">2010 • 320d • Manual</div>
-        <a class="btn" href="auto.html">Pogledaj</a>
-      </div>
-    </div>
-  </div>
+  <div id="cars" class="grid"></div>
+  <div id="msg" class="small" style="margin-top:12px"></div>
 </section>
 
 <footer class="footer">© 2026 La Familia Team</footer>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase.js"></script>
+
 <script>
-function filterCars(q){
-  q = (q||"").toLowerCase().trim();
-  document.querySelectorAll("#cars .card").forEach(card=>{
-    const s = (card.getAttribute("data-search")||"").toLowerCase();
-    card.style.display = s.includes(q) ? "" : "none";
+let allCars = [];
+
+function esc(s){ return String(s ?? "").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;"); }
+
+async function loadCars(){
+  const msg = document.getElementById("msg");
+  msg.textContent = "Učitavam…";
+
+  const { data, error } = await window.sb
+    .from("cars")
+    .select("id, make, model, year, engine, transmission, cover_url, location, setup, power_hp, owner_id, profiles(display_name)")
+    .order("created_at", { ascending: false });
+
+  if(error){
+    msg.textContent = "Greška: " + error.message;
+    return;
+  }
+
+  allCars = data || [];
+  msg.textContent = "";
+  render();
+}
+
+function render(){
+  const q = (document.getElementById("q").value || "").toLowerCase().trim();
+  const root = document.getElementById("cars");
+  root.innerHTML = "";
+
+  const filtered = allCars.filter(c=>{
+    const owner = c.profiles?.display_name || "";
+    const hay = `${owner} ${c.make} ${c.model} ${c.year} ${c.engine||""} ${c.transmission||""} ${c.location||""} ${c.setup||""}`.toLowerCase();
+    return hay.includes(q);
+  });
+
+  if(filtered.length === 0){
+    root.innerHTML = `<div class="small">Nema rezultata.</div>`;
+    return;
+  }
+
+  filtered.forEach(c=>{
+    const owner = c.profiles?.display_name || "—";
+    const thumbStyle = c.cover_url ? `background-image:url('${c.cover_url}')` : "";
+    root.insertAdjacentHTML("beforeend", `
+      <div class="card">
+        <div class="thumb" style="${thumbStyle}"></div>
+        <div class="cardbody">
+          <div class="small">${esc(owner)}${c.location ? " • " + esc(c.location) : ""}</div>
+          <div style="font-size:18px;font-weight:900">${esc(c.make)} ${esc(c.model)}</div>
+          <div class="small">${esc(c.year)} • ${esc(c.engine || "—")} • ${esc(c.transmission || "—")}</div>
+          <a class="btn" href="auto.html?id=${encodeURIComponent(c.id)}">Pogledaj</a>
+        </div>
+      </div>
+    `);
   });
 }
-script src="supabase.js"></script>
-</script>
 
+loadCars();
+</script>
 </body>
 </html>
