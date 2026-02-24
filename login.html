@@ -155,8 +155,7 @@ async function forgotPassword(){
 
   const { error } =
     await window.sb.auth.resetPasswordForEmail(email,{
-      redirectTo:
-      "https://b3lk00.github.io/la-familia-team/reset.html"
+      redirectTo: window.location.origin + "/reset.html"
     });
 
   if(error){
@@ -165,7 +164,7 @@ async function forgotPassword(){
   }
 
   msg.textContent =
-    "✅ Poslan email za promjenu lozinke (provjeri spam).";
+    "✅ Poslan email za promjenu lozinke.";
 }
 
 // ako je već loginovan
