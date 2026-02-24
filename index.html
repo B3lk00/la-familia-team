@@ -119,32 +119,63 @@ body{
   font-weight:800;
 }
 
-.videoThumb{
-  position:relative;
-  width:100%;
-  aspect-ratio:9/16;          /* Reels/TikTok format */
-  background:#000;
-  overflow:hidden;            /* sakrije bijele rubove */
-  border-bottom:1px solid #2a2f3d;
+.videoGrid{
+  max-width:1100px;
+  margin:20px auto;
+  padding:0 20px 40px;
+  display:grid;
+  grid-template-columns:repeat(auto-fit, minmax(220px, 1fr));
+  gap:16px;
 }
 
-/* iframe se uveća i “odreže” rubove */
-.videoThumb iframe{
-  position:absolute;
-  top:50%;
-  left:50%;
-  width:120%;                 /* povećaj da pojede rubove */
-  height:120%;
-  transform:translate(-50%,-50%);
-  border:0;
-}
-
-/* kartica */
+/* manja kartica */
 .videoCard{
   border:1px solid #2a2f3d;
   border-radius:16px;
   background:rgba(28,31,42,.75);
   overflow:hidden;
+  transition:.2s ease;
+}
+
+.videoCard:hover{
+  transform:translateY(-4px);
+}
+
+/* vertikalni format ali manji */
+.videoThumb{
+  position:relative;
+  width:100%;
+  aspect-ratio:9/16;
+  background:#000;
+  overflow:hidden;
+}
+
+/* crop trik */
+.videoThumb iframe{
+  position:absolute;
+  top:50%;
+  left:50%;
+  width:120%;
+  height:120%;
+  transform:translate(-50%,-50%);
+  border:0;
+}
+
+/* tekst ispod */
+.videoMeta{
+  padding:10px 12px 14px;
+}
+
+.videoTitle{
+  margin:0;
+  font-size:14px;
+  font-weight:800;
+}
+
+.videoDesc{
+  margin:4px 0 0;
+  font-size:12px;
+  color:#a7adbb;
 }
 
 footer{
