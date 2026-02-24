@@ -1,1 +1,268 @@
+<!DOCTYPE html>
+<html lang="bs">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Admin | La Familia</title>
+<style>
+:root{--bg:#0f1117;--card:#1c1f2a;--line:#2a2f3d;--muted:#a7adbb;--acc:#ff2e63;}
+*{box-sizing:border-box}
+body{margin:0;font-family:'Segoe UI',sans-serif;background:var(--bg);color:#fff}
+.navbar{display:flex;justify-content:space-between;align-items:center;padding:18px 32px;background:rgba(0,0,0,.55);backdrop-filter:blur(10px);position:sticky;top:0;border-bottom:1px solid var(--line)}
+.logo{font-weight:800;letter-spacing:1px}
+.navbar a,.navbar button{color:#fff;text-decoration:none;margin-left:18px;font-weight:600;opacity:.9;background:none;border:0;cursor:pointer}
+.navbar a:hover,.navbar button:hover{opacity:1}
+.wrap{max-width:1100px;margin:auto;padding:22px}
+.card{background:rgba(28,31,42,.85);border:1px solid var(--line);border-radius:16px;padding:14px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:14px}
+h1{margin:0 0 8px}
+h2{margin:0 0 10px}
+.small{color:var(--muted);font-size:13px}
+input,select{width:100%;padding:12px 14px;border-radius:12px;border:1px solid var(--line);background:#0b0d12;color:#fff}
+.row{display:grid;gap:10px}
+.btn{display:inline-block;padding:10px 14px;border-radius:12px;border:0;background:var(--acc);color:#fff;font-weight:800;cursor:pointer}
+.btn:disabled{opacity:.6;cursor:not-allowed}
+hr{border:0;border-top:1px solid var(--line);margin:14px 0}
+.table{width:100%;border-collapse:collapse;margin-top:10px}
+.table th,.table td{border-bottom:1px solid var(--line);padding:10px 8px;text-align:left;font-size:13px}
+.table th{color:var(--muted);font-weight:700}
+.badge{display:inline-block;padding:6px 10px;border:1px solid var(--line);border-radius:999px;color:var(--muted);font-size:12px}
+</style>
+</head>
+<body>
 
+<header class="navbar">
+  <div class="logo">LA FAMILIA TEAM</div>
+  <nav>
+    <a href="index.html">Početna</a>
+    <a href="garaza.html">Garaža</a>
+    <a href="panel.html">Panel</a>
+    <a href="admin.html">Admin</a>
+    <button onclick="logout()">Logout</button>
+  </nav>
+</header>
+
+<div class="wrap">
+  <h1>Admin panel</h1>
+  <div id="status" class="small">Učitavam…</div>
+
+  <div class="grid" style="margin-top:14px">
+
+    <!-- CREATE CAR -->
+    <div class="card">
+      <h2>Dodaj auto</h2>
+      <div class="small">Owner = korisnik koji će moći uređivati ovo auto u panelu.</div>
+
+      <div class="row" style="margin-top:10px">
+        <select id="owner"></select>
+
+        <input id="make" placeholder="Marka (npr. Audi)" />
+        <input id="model" placeholder="Model (npr. A5 Facelift)" />
+        <input id="year" type="number" placeholder="Godište (npr. 2014)" />
+
+        <input id="engine" placeholder="Motor (opciono)" />
+        <input id="transmission" placeholder="Mjenjač (opciono)" />
+        <input id="power" type="number" placeholder="Snaga KS (opciono)" />
+        <input id="location" placeholder="Lokacija (opciono)" />
+        <input id="setup" placeholder="Setup (opciono)" />
+
+        <button class="btn" id="createBtn" onclick="createCar()">Create</button>
+        <div id="createMsg" class="small"></div>
+      </div>
+    </div>
+
+    <!-- LISTS -->
+    <div class="card">
+      <h2>Korisnici</h2>
+      <div class="small">Ovo su profili iz baze (profiles).</div>
+      <div id="usersWrap"></div>
+
+      <hr />
+
+      <h2>Auta</h2>
+      <div class="small">Lista iz cars tabele.</div>
+      <div id="carsWrap"></div>
+    </div>
+
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase.js"></script>
+<script src="auth-guard.js"></script>
+
+<script>
+let session = null;
+let me = null;
+
+async function logout(){
+  await window.sb.auth.signOut();
+  window.location.href = "login.html";
+}
+
+function esc(s){ return String(s ?? "").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;"); }
+
+async function init(){
+  session = await window.requireAuth();
+  if(!session) return;
+
+  // check my role
+  const { data: prof, error: pe } = await window.sb
+    .from("profiles")
+    .select("id, display_name, role")
+    .eq("id", session.user.id)
+    .single();
+
+  if(pe){ document.getElementById("status").textContent = "Greška: " + pe.message; return; }
+  me = prof;
+
+  if(me.role !== "admin"){
+    document.getElementById("status").innerHTML = `Nemaš admin prava. <span class="badge">role=${esc(me.role)}</span>`;
+    document.getElementById("createBtn").disabled = true;
+    return;
+  }
+
+  document.getElementById("status").innerHTML = `Ulogovan kao admin: <span class="badge">${esc(me.display_name)}</span>`;
+
+  await loadUsers();
+  await loadCars();
+}
+
+async function loadUsers(){
+  const { data, error } = await window.sb
+    .from("profiles")
+    .select("id, display_name, role")
+    .order("display_name", { ascending: true });
+
+  const ownerSel = document.getElementById("owner");
+  ownerSel.innerHTML = "";
+
+  if(error){
+    document.getElementById("usersWrap").innerHTML = `<div class="small">Greška: ${esc(error.message)}</div>`;
+    return;
+  }
+
+  // dropdown
+  data.forEach(u=>{
+    ownerSel.insertAdjacentHTML("beforeend",
+      `<option value="${esc(u.id)}">${esc(u.display_name)} (${esc(u.role)})</option>`
+    );
+  });
+
+  // table
+  document.getElementById("usersWrap").innerHTML = `
+    <table class="table">
+      <thead><tr><th>Ime</th><th>Role</th><th>ID (skraćeno)</th></tr></thead>
+      <tbody>
+        ${data.map(u=>`
+          <tr>
+            <td>${esc(u.display_name)}</td>
+            <td>${esc(u.role)}</td>
+            <td class="small">${esc(u.id).slice(0,8)}…</td>
+          </tr>
+        `).join("")}
+      </tbody>
+    </table>
+  `;
+}
+
+async function loadCars(){
+  const { data, error } = await window.sb
+    .from("cars")
+    .select("id, make, model, year, owner_id, profiles(display_name)")
+    .order("created_at", { ascending: false });
+
+  if(error){
+    document.getElementById("carsWrap").innerHTML = `<div class="small">Greška: ${esc(error.message)}</div>`;
+    return;
+  }
+
+  document.getElementById("carsWrap").innerHTML = `
+    <table class="table">
+      <thead><tr><th>Auto</th><th>Owner</th><th>ID (skraćeno)</th></tr></thead>
+      <tbody>
+        ${data.map(c=>`
+          <tr>
+            <td>${esc(c.make)} ${esc(c.model)} (${esc(c.year)})</td>
+            <td>${esc(c.profiles?.display_name || "—")}</td>
+            <td class="small">${esc(c.id).slice(0,8)}…</td>
+          </tr>
+        `).join("")}
+      </tbody>
+    </table>
+  `;
+}
+
+async function createCar(){
+  const msg = document.getElementById("createMsg");
+  msg.textContent = "";
+
+  const owner_id = document.getElementById("owner").value;
+  const make = document.getElementById("make").value.trim();
+  const model = document.getElementById("model").value.trim();
+  const year = parseInt(document.getElementById("year").value, 10);
+
+  if(!owner_id || !make || !model || !Number.isFinite(year)){
+    msg.textContent = "Popuni: owner, marka, model, godina.";
+    return;
+  }
+
+  const payload = {
+    owner_id,
+    make,
+    model,
+    year,
+    engine: document.getElementById("engine").value.trim() || null,
+    transmission: document.getElementById("transmission").value.trim() || null,
+    power_hp: (()=>{ const n = parseInt(document.getElementById("power").value,10); return Number.isFinite(n)?n:null; })(),
+    location: document.getElementById("location").value.trim() || null,
+    setup: document.getElementById("setup").value.trim() || null,
+    cover_url: null
+  };
+
+  document.getElementById("createBtn").disabled = true;
+  msg.textContent = "Kreiram…";
+
+  // call Edge Function
+  const { data: { session } } = await window.sb.auth.getSession();
+  const jwt = session?.access_token;
+
+  try{
+    const res = await fetch(`${SUPABASE_URL}/functions/v1/admin-create-car`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${jwt}`
+      },
+      body: JSON.stringify(payload)
+    });
+
+    const out = await res.json();
+    if(!res.ok){
+      msg.textContent = "Greška: " + (out.error || res.statusText);
+      document.getElementById("createBtn").disabled = false;
+      return;
+    }
+
+    msg.textContent = "Auto kreiran ✅";
+    document.getElementById("make").value = "";
+    document.getElementById("model").value = "";
+    document.getElementById("year").value = "";
+    document.getElementById("engine").value = "";
+    document.getElementById("transmission").value = "";
+    document.getElementById("power").value = "";
+    document.getElementById("location").value = "";
+    document.getElementById("setup").value = "";
+
+    await loadCars();
+  }catch(e){
+    msg.textContent = "Greška: " + e.message;
+  }finally{
+    document.getElementById("createBtn").disabled = false;
+  }
+}
+
+init();
+</script>
+</body>
+</html>
