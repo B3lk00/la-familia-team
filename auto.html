@@ -404,8 +404,8 @@ async function load(){
     coverEl.style.cursor = "default";
   }
 
-  document.getElementById("title").textContent = `${car.make} ${car.model} (${car.year)}`;
-
+  document.getElementById("title").textContent = `${car.make} ${car.model} (${car.year})`;
+  
   const owner = car.profiles?.display_name || "—";
   const locText = car.location ? ` • ${car.location}` : "";
   document.getElementById("subtitle").textContent = `Vlasnik: ${owner}${locText}`;
