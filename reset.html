@@ -117,7 +117,7 @@ input{
   </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="supabase.js"></script>
 
 <script>
@@ -141,24 +141,44 @@ function showForm(){
 }
 
 async function initRecovery(){
-  // ✅ KLJUČNO: ovo “pokupi” token iz URL-a i napravi session
-  const { data, error } = await window.sb.auth.getSessionFromUrl({
-    storeSession: true
-  });
+  try{
+    const url = new URL(window.location.href);
 
-  if(error){
-    showError("Reset link nije validan ili je istekao. Vrati se na login i pošalji novi reset email.");
-    return;
-  }
+    // ✅ NOVI flow (najčešći): ?code=...
+    const code = url.searchParams.get("code");
+    if(code){
+      const { error } = await window.sb.auth.exchangeCodeForSession(code);
+      if(error){
+        showError("Reset link nije validan ili je istekao. Vrati se na login i pošalji novi.");
+        return;
+      }
+      showForm();
+      return;
+    }
 
-  // Ako nema session-a, znači da nije pravi recovery URL
-  const { data: sessData } = await window.sb.auth.getSession();
-  if(!sessData?.session){
+    // ✅ STARI flow: #access_token=...
+    if(window.location.hash && window.location.hash.includes("access_token=")){
+      // pokušaj ručno “ubaciti” session iz hash tokena
+      const hash = new URLSearchParams(window.location.hash.slice(1));
+      const access_token = hash.get("access_token");
+      const refresh_token = hash.get("refresh_token");
+
+      if(access_token && refresh_token){
+        const { error } = await window.sb.auth.setSession({ access_token, refresh_token });
+        if(error){
+          showError("Reset link nije validan ili je istekao. Vrati se na login i pošalji novi.");
+          return;
+        }
+        showForm();
+        return;
+      }
+    }
+
+    // ako nema ništa
     showError("Ova stranica radi samo kad dođeš preko reset linka iz emaila.");
-    return;
+  }catch(e){
+    showError("Greška: " + String(e));
   }
-
-  showForm();
 }
 
 async function setNewPassword(){
@@ -189,13 +209,9 @@ async function setNewPassword(){
   }
 
   msg.textContent = "✅ Lozinka promijenjena! Preusmjeravam na login…";
-
-  // opcionalno: odjavi odmah (čistije)
   await window.sb.auth.signOut();
 
-  setTimeout(() => {
-    window.location.href = "login.html";
-  }, 1400);
+  setTimeout(()=>{ window.location.href="login.html"; }, 1400);
 }
 
 initRecovery();
