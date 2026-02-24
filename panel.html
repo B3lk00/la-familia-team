@@ -63,6 +63,24 @@ hr{border:0;border-top:1px solid var(--line);margin:14px 0}
     <div class="card">
       <h2>Moj auto</h2>
       <div id="carTitle" class="small">—</div>
+
+      <!-- CREATE CAR BOX (prikazuje se samo ako user nema auto) -->
+      <div id="createBox" style="display:none; margin-top:10px">
+        <div class="small">Nemaš auto još. Popuni šablon i klikni “Kreiraj auto”.</div>
+        <div style="display:grid; gap:10px; margin-top:10px">
+          <input id="c_make" placeholder="Marka (npr. Audi)" />
+          <input id="c_model" placeholder="Model (npr. A5 Facelift)" />
+          <input id="c_year" type="number" placeholder="Godište (npr. 2014)" />
+          <input id="c_engine" placeholder="Motor (opciono)" />
+          <input id="c_transmission" placeholder="Mjenjač (opciono)" />
+          <input id="c_power" type="number" placeholder="Snaga KS (opciono)" />
+          <input id="c_location" placeholder="Lokacija (opciono)" />
+          <input id="c_setup" placeholder="Setup (opciono)" />
+          <button class="btn" onclick="createMyCar()">Kreiraj auto</button>
+          <div id="createMsg" class="small"></div>
+        </div>
+      </div>
+
       <div id="cover" class="cover" style="margin-top:10px"></div>
 
       <div style="margin-top:10px">
@@ -84,10 +102,21 @@ hr{border:0;border-top:1px solid var(--line);margin:14px 0}
         <button class="btn" onclick="saveCarInfo()">Sačuvaj</button>
         <div id="carMsg" class="small"></div>
       </div>
+
+      <hr />
+
+      <!-- INSTAGRAM -->
+      <div class="small">Instagram (profil)</div>
+      <div style="display:grid; gap:10px; margin-top:10px">
+        <input id="instagram" placeholder="@tvojinstagram (npr. @amar_a5)" />
+        <button class="btn" onclick="saveInstagram()">Sačuvaj Instagram</button>
+        <div id="igMsg" class="small"></div>
+      </div>
+
     </div>
 
     <!-- DODAJ UPDATE -->
-    <div class="card">
+    <div class="card" id="updatesCard">
       <h2>Dodaj build update</h2>
       <div style="display:grid; gap:10px">
         <input id="u_date" type="date" />
@@ -105,7 +134,7 @@ hr{border:0;border-top:1px solid var(--line);margin:14px 0}
     </div>
 
     <!-- GALERIJA -->
-    <div class="card">
+    <div class="card" id="galleryCard">
       <h2>Galerija (više slika)</h2>
       <div class="small">Možeš odjednom izabrati više slika.</div>
       <input id="g_files" type="file" accept="image/*" multiple style="margin-top:10px" />
@@ -131,6 +160,18 @@ function safeNum(v){
   return Number.isFinite(n) ? n : null;
 }
 
+function setCarsUiEnabled(enabled){
+  // cover
+  document.getElementById("cover").style.display = enabled ? "" : "none";
+  document.getElementById("coverFile").disabled = !enabled;
+
+  // updates + gallery cards
+  document.getElementById("updatesCard").style.opacity = enabled ? "1" : ".45";
+  document.getElementById("galleryCard").style.opacity = enabled ? "1" : ".45";
+
+  // disable buttons by simply guarding in functions (below)
+}
+
 async function logout(){
   await window.sb.auth.signOut();
   window.location.href = "login.html";
@@ -142,29 +183,39 @@ async function init(){
 
   document.getElementById("who").textContent = `Ulogovan: ${session.user.email}`;
 
-  // učitaj moj profile
+  // učitaj moj profile (sa instagram)
   const { data: prof, error: pe } = await window.sb
     .from("profiles")
-    .select("id, display_name, role")
+    .select("id, display_name, role, instagram")
     .eq("id", session.user.id)
     .single();
 
   if(pe){ alert(pe.message); return; }
   me = prof;
 
+  // popuni instagram input
+  document.getElementById("instagram").value = me.instagram || "";
+
   // pronađi moj auto (owner_id = ja)
   const { data: car, error: ce } = await window.sb
     .from("cars")
     .select("*")
     .eq("owner_id", me.id)
-    .single();
+    .maybeSingle();
 
-  if(ce){
-    document.getElementById("carTitle").textContent = "Nema auta dodijeljenog ovom korisniku. (Admin treba dodati auto i owner_id).";
+  // ako nema auta -> prikaži create box i ugasi ostalo
+  if(ce || !car){
+    document.getElementById("carTitle").textContent = "Nema auta (još).";
+    document.getElementById("createBox").style.display = "block";
+    setCarsUiEnabled(false);
     return;
   }
 
+  // ima auto
   myCar = car;
+  document.getElementById("createBox").style.display = "none";
+  setCarsUiEnabled(true);
+
   renderCarCard();
   await loadUpdates();
   await loadGallery();
@@ -173,6 +224,7 @@ async function init(){
 function renderCarCard(){
   document.getElementById("carTitle").textContent = `${myCar.make} ${myCar.model} (${myCar.year}) • ${me.display_name}`;
   const cover = document.getElementById("cover");
+  cover.style.backgroundImage = "";
   if(myCar.cover_url) cover.style.backgroundImage = `url('${myCar.cover_url}')`;
 
   document.getElementById("engine").value = myCar.engine || "";
@@ -182,7 +234,75 @@ function renderCarCard(){
   document.getElementById("location").value = myCar.location || "";
 }
 
+async function createMyCar(){
+  const msg = document.getElementById("createMsg");
+  msg.textContent = "";
+
+  const make = document.getElementById("c_make").value.trim();
+  const model = document.getElementById("c_model").value.trim();
+  const year = parseInt(document.getElementById("c_year").value, 10);
+
+  if(!make || !model || !Number.isFinite(year)){
+    msg.textContent = "Popuni marka, model i godište.";
+    return;
+  }
+
+  const payload = {
+    owner_id: me.id,
+    make,
+    model,
+    year,
+    engine: document.getElementById("c_engine").value.trim() || null,
+    transmission: document.getElementById("c_transmission").value.trim() || null,
+    power_hp: (()=>{ const n = parseInt(document.getElementById("c_power").value,10); return Number.isFinite(n)?n:null; })(),
+    location: document.getElementById("c_location").value.trim() || null,
+    setup: document.getElementById("c_setup").value.trim() || null,
+    cover_url: null
+  };
+
+  msg.textContent = "Kreiram…";
+
+  const { data, error } = await window.sb
+    .from("cars")
+    .insert(payload)
+    .select("*")
+    .single();
+
+  if(error){
+    msg.textContent = "Greška: " + error.message;
+    return;
+  }
+
+  myCar = data;
+  msg.textContent = "Auto kreiran ✅";
+  document.getElementById("createBox").style.display = "none";
+  setCarsUiEnabled(true);
+
+  renderCarCard();
+  await loadUpdates();
+  await loadGallery();
+}
+
+async function saveInstagram(){
+  const msg = document.getElementById("igMsg");
+  msg.textContent = "";
+
+  let ig = document.getElementById("instagram").value.trim();
+  if(ig && !ig.startsWith("@")) ig = "@" + ig;
+
+  const { error } = await window.sb
+    .from("profiles")
+    .update({ instagram: ig || null })
+    .eq("id", me.id);
+
+  if(error){ msg.textContent = "Greška: " + error.message; return; }
+  me.instagram = ig || null;
+  msg.textContent = "Sačuvano ✅";
+}
+
 async function saveCarInfo(){
+  if(!myCar){ alert("Prvo kreiraj auto."); return; }
+
   const msg = document.getElementById("carMsg");
   msg.textContent = "";
 
@@ -198,12 +318,10 @@ async function saveCarInfo(){
   if(error){ msg.textContent = "Greška: " + error.message; return; }
 
   msg.textContent = "Sačuvano ✅";
-  // refresh lokalno
   myCar = { ...myCar, ...payload };
 }
 
 async function uploadToStorage(file, path){
-  // unique name
   const ext = file.name.split(".").pop() || "jpg";
   const fullPath = `${path}/${Date.now()}-${Math.random().toString(16).slice(2)}.${ext}`;
 
@@ -218,6 +336,8 @@ async function uploadToStorage(file, path){
 }
 
 async function uploadCover(){
+  if(!myCar){ alert("Prvo kreiraj auto."); return; }
+
   const msg = document.getElementById("coverMsg");
   msg.textContent = "";
 
@@ -238,6 +358,8 @@ async function uploadCover(){
 }
 
 async function addUpdate(){
+  if(!myCar){ alert("Prvo kreiraj auto."); return; }
+
   const msg = document.getElementById("u_msg");
   msg.textContent = "";
 
@@ -279,6 +401,8 @@ async function addUpdate(){
 }
 
 async function loadUpdates(){
+  if(!myCar) return;
+
   const root = document.getElementById("updates");
   root.innerHTML = `<div class="small">Učitavam…</div>`;
 
@@ -319,6 +443,8 @@ async function deleteUpdate(id){
 }
 
 async function uploadGallery(){
+  if(!myCar){ alert("Prvo kreiraj auto."); return; }
+
   const msg = document.getElementById("g_msg");
   msg.textContent = "";
 
@@ -347,6 +473,8 @@ async function uploadGallery(){
 }
 
 async function loadGallery(){
+  if(!myCar) return;
+
   const root = document.getElementById("gallery");
   root.innerHTML = "";
 
