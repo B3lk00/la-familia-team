@@ -4,48 +4,130 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Login | La Familia</title>
+
 <style>
 :root{--bg:#0f1117;--card:#1c1f2a;--line:#2a2f3d;--muted:#a7adbb;--acc:#ff2e63;}
 *{box-sizing:border-box}
-body{margin:0;font-family:'Segoe UI',sans-serif;background:var(--bg);color:#fff;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px}
-.card{width:min(520px,100%);background:rgba(28,31,42,.9);border:1px solid var(--line);border-radius:18px;padding:18px}
+
+body{
+margin:0;
+font-family:'Segoe UI',sans-serif;
+background:var(--bg);
+color:#fff;
+min-height:100vh;
+display:flex;
+align-items:center;
+justify-content:center;
+padding:24px
+}
+
+.card{
+width:min(520px,100%);
+background:rgba(28,31,42,.9);
+border:1px solid var(--line);
+border-radius:18px;
+padding:18px
+}
+
 h1{margin:0 0 10px}
-.small{color:var(--muted);font-size:13px}
-.row{display:grid;gap:10px;margin-top:14px}
-input{width:100%;padding:12px 14px;border-radius:12px;border:1px solid var(--line);background:#0b0d12;color:#fff}
-button{padding:12px 14px;border-radius:12px;border:0;background:var(--acc);color:#fff;font-weight:800;cursor:pointer}
-button:disabled{opacity:.6;cursor:not-allowed}
-a{color:#fff}
+
+.small{
+color:var(--muted);
+font-size:13px
+}
+
+.row{
+display:grid;
+gap:10px;
+margin-top:14px
+}
+
+input{
+width:100%;
+padding:12px 14px;
+border-radius:12px;
+border:1px solid var(--line);
+background:#0b0d12;
+color:#fff
+}
+
+button{
+padding:12px 14px;
+border-radius:12px;
+border:0;
+background:var(--acc);
+color:#fff;
+font-weight:800;
+cursor:pointer
+}
+
+button:disabled{
+opacity:.6;
+cursor:not-allowed
+}
+
+.linkBtn{
+background:none;
+border:none;
+color:#fff;
+text-decoration:underline;
+cursor:pointer;
+opacity:.85;
+font-size:13px;
+text-align:left;
+padding:0;
+}
+
+.linkBtn:hover{
+opacity:1;
+}
 </style>
 </head>
+
 <body>
 
 <div class="card">
   <h1>Prijava</h1>
-  <div class="small">Invite-only: račun ti je napravio admin. Prijavi se sa emailom i šifrom.</div>
+
+  <div class="small">
+    Invite-only: račun ti je napravio admin.  
+    Prijavi se sa emailom i šifrom.
+  </div>
 
   <div class="row">
     <input id="email" type="email" placeholder="Email" autocomplete="email" />
     <input id="pass" type="password" placeholder="Šifra" autocomplete="current-password" />
+
     <button id="btn" onclick="login()">Uđi</button>
+
+    <button class="linkBtn" onclick="forgotPassword()">
+      Zaboravljena lozinka?
+    </button>
+
     <div id="msg" class="small"></div>
-    <div class="small">Nakon prijave ideš na <a href="panel.html">panel</a>.</div>
+
+    <div class="small">
+      Nakon prijave ideš na <a href="panel.html">panel</a>.
+    </div>
   </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="supabase.js"></script>
+
 <script>
 async function login(){
   const btn = document.getElementById("btn");
   const msg = document.getElementById("msg");
+
   msg.textContent = "";
   btn.disabled = true;
 
   const email = document.getElementById("email").value.trim();
   const password = document.getElementById("pass").value;
 
-  const { error } = await window.sb.auth.signInWithPassword({ email, password });
+  const { error } =
+    await window.sb.auth.signInWithPassword({ email, password });
 
   btn.disabled = false;
 
@@ -53,14 +135,48 @@ async function login(){
     msg.textContent = "Greška: " + error.message;
     return;
   }
+
   window.location.href = "panel.html";
 }
 
-// ako je već ulogovan, preusmjeri na panel
+// ✅ RESET PASSWORD
+async function forgotPassword(){
+  const email = document.getElementById("email").value.trim();
+  const msg = document.getElementById("msg");
+
+  msg.textContent = "";
+
+  if(!email){
+    msg.textContent = "Prvo upiši email.";
+    return;
+  }
+
+  msg.textContent = "Šaljem reset link...";
+
+  const { error } =
+    await window.sb.auth.resetPasswordForEmail(email,{
+      redirectTo:
+      "https://b3lk00.github.io/la-familia-team/reset.html"
+    });
+
+  if(error){
+    msg.textContent = "Greška: " + error.message;
+    return;
+  }
+
+  msg.textContent =
+    "✅ Poslan email za promjenu lozinke (provjeri spam).";
+}
+
+// ako je već loginovan
 (async () => {
-  const { data: { session } } = await window.sb.auth.getSession();
-  if(session) window.location.href = "panel.html";
+  const { data:{ session } } =
+    await window.sb.auth.getSession();
+
+  if(session)
+    window.location.href="panel.html";
 })();
 </script>
+
 </body>
 </html>
