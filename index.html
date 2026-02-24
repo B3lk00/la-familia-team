@@ -207,5 +207,53 @@ setInterval(() => {
 }, 5000);
 </script>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase.js"></script>
+<script>
+function esc(s){return String(s??"").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;");}
+
+async function loadVideos(){
+  const root = document.getElementById("videoGrid");
+  if(!root) return;
+
+  const { data, error } = await window.sb
+    .from("videos")
+    .select("id, title, embed_url, source")
+    .eq("is_published", true)
+    .order("created_at", { ascending: false })
+    .limit(12);
+
+  if(error){
+    root.innerHTML = `<div class="small" style="padding:0 22px">Greška: ${esc(error.message)}</div>`;
+    return;
+  }
+
+  if(!data || !data.length){
+    root.innerHTML = `<div class="small" style="padding:0 22px">Nema videa još.</div>`;
+    return;
+  }
+
+  root.innerHTML = data.map(v => `
+    <div class="videoCard">
+      <div class="videoThumb">
+        <iframe
+          src="${v.embed_url}"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+          allowfullscreen
+          loading="lazy"
+          title="${esc(v.title || "Video")}"
+        ></iframe>
+      </div>
+      <div class="videoMeta">
+        <p class="videoTitle">${esc(v.title || "Video")}</p>
+        <p class="videoDesc">${esc(v.source || "")}</p>
+      </div>
+    </div>
+  `).join("");
+}
+
+loadVideos();
+</script>
+  
 </body>
 </html>
