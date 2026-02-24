@@ -14,7 +14,7 @@ body{margin:0;font-family:'Segoe UI',sans-serif;background:var(--bg);color:#fff}
 .navbar a:hover{opacity:1}
 .wrap{max-width:1100px;margin:auto;padding:22px}
 .hero{border:1px solid var(--line);border-radius:18px;overflow:hidden;background: linear-gradient(135deg, rgba(255,46,99,.15), rgba(0,190,255,.10)), #141827;}
-.cover{height:340px;background:linear-gradient(135deg,#2a2f3d,#141827);background-size:cover;background-position:center}
+.cover{height:340px;background:linear-gradient(135deg,#2a2f3d,#141827);background-size:cover;background-position:center; cursor: zoom-in;}
 .herotxt{padding:14px 16px}
 .small{color:var(--muted);font-size:13px}
 .specs{margin-top:14px;display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:10px}
@@ -26,12 +26,104 @@ body{margin:0;font-family:'Segoe UI',sans-serif;background:var(--bg);color:#fff}
 .updates{display:grid;gap:10px;margin-top:10px}
 .update h3{margin:6px 0 4px}
 .update p{margin:8px 0 0;color:#d7dbe6}
-.uimg{width:100%;height:240px;object-fit:cover;border-radius:14px;margin-top:10px;border:1px solid var(--line)}
+.uimg{width:100%;height:240px;object-fit:cover;border-radius:14px;margin-top:10px;border:1px solid var(--line);cursor: zoom-in;}
 .badges{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
 .badge{border:1px solid var(--line);border-radius:999px;padding:6px 10px;color:var(--muted);font-size:12px}
 .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin-top:10px}
-.photo{height:180px;border-radius:16px;border:1px solid var(--line);background:#0f1118 center/cover no-repeat}
+.photo{height:180px;border-radius:16px;border:1px solid var(--line);background:#0f1118 center/cover no-repeat; cursor: zoom-in;}
 .footer{text-align:center;padding:26px;color:#80879a;border-top:1px solid var(--line);margin-top:30px}
+
+/* ===== Lightbox ===== */
+.lightbox{
+  position:fixed; inset:0;
+  background:rgba(0,0,0,.86);
+  display:none;
+  align-items:center;
+  justify-content:center;
+  z-index:9999;
+  padding:18px;
+}
+.lightbox.active{ display:flex; }
+
+.lb-inner{
+  position:relative;
+  width:min(1100px, 96vw);
+  height:min(92vh, 820px);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+
+.lightbox img{
+  max-width:100%;
+  max-height:100%;
+  border-radius:16px;
+  border:1px solid var(--line);
+  background:#0b0d12;
+}
+
+.lb-top{
+  position:fixed;
+  top:14px; left:14px; right:14px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:10px;
+  pointer-events:none;
+}
+.lb-pill{
+  pointer-events:auto;
+  display:inline-flex;
+  align-items:center;
+  gap:10px;
+  padding:10px 12px;
+  border-radius:14px;
+  border:1px solid var(--line);
+  background:rgba(0,0,0,.55);
+  color:#fff;
+  font-weight:800;
+}
+.lb-sub{
+  font-weight:600;
+  color:var(--muted);
+  font-size:12px;
+}
+.lb-close{
+  pointer-events:auto;
+  cursor:pointer;
+  border:1px solid var(--line);
+  background:rgba(0,0,0,.55);
+  color:#fff;
+  border-radius:14px;
+  padding:10px 12px;
+  font-weight:900;
+}
+
+.lb-nav{
+  position:absolute;
+  top:50%;
+  transform:translateY(-50%);
+  width:52px;
+  height:52px;
+  border-radius:16px;
+  border:1px solid var(--line);
+  background:rgba(0,0,0,.45);
+  color:#fff;
+  font-weight:900;
+  cursor:pointer;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  user-select:none;
+}
+.lb-prev{ left:10px; }
+.lb-next{ right:10px; }
+
+@media (max-width: 520px){
+  .lb-nav{ width:46px; height:46px; border-radius:14px; }
+  .lb-prev{ left:6px; }
+  .lb-next{ right:6px; }
+}
 </style>
 </head>
 <body>
@@ -49,7 +141,7 @@ body{margin:0;font-family:'Segoe UI',sans-serif;background:var(--bg);color:#fff}
   <a class="small" href="garaza.html">← nazad na garažu</a>
 
   <section class="hero" style="margin-top:10px">
-    <div id="cover" class="cover"></div>
+    <div id="cover" class="cover" title="Klikni za full screen"></div>
     <div class="herotxt">
       <h1 id="title" style="margin:0 0 6px">Učitavam…</h1>
       <div id="subtitle" class="small">—</div>
@@ -78,6 +170,23 @@ body{margin:0;font-family:'Segoe UI',sans-serif;background:var(--bg);color:#fff}
 
 <footer class="footer">© 2026 La Familia Team</footer>
 
+<!-- Lightbox -->
+<div id="lb" class="lightbox" aria-hidden="true">
+  <div class="lb-top">
+    <div class="lb-pill">
+      <span>Pregled</span>
+      <span id="lbCount" class="lb-sub">—</span>
+    </div>
+    <button class="lb-close" id="lbClose" title="Zatvori (Esc)">✕</button>
+  </div>
+
+  <div class="lb-inner" id="lbInner">
+    <button class="lb-nav lb-prev" id="lbPrev" title="Prethodna (←)">‹</button>
+    <img id="lbImg" src="" alt="Slika" />
+    <button class="lb-nav lb-next" id="lbNext" title="Sljedeća (→)">›</button>
+  </div>
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="supabase.js"></script>
 
@@ -88,6 +197,101 @@ function getParam(name){
 }
 function esc(s){ return String(s ?? "").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;"); }
 
+// ===== Lightbox logic (arrows + swipe) =====
+let lbImages = [];      // array of urls (cover + gallery + update images)
+let lbIndex = 0;
+let lbOpen = false;
+
+const lb = document.getElementById("lb");
+const lbImg = document.getElementById("lbImg");
+const lbCount = document.getElementById("lbCount");
+const lbPrev = document.getElementById("lbPrev");
+const lbNext = document.getElementById("lbNext");
+const lbClose = document.getElementById("lbClose");
+const lbInner = document.getElementById("lbInner");
+
+function openLb(index){
+  if(!lbImages.length) return;
+  lbIndex = Math.max(0, Math.min(index, lbImages.length - 1));
+  lbImg.src = lbImages[lbIndex];
+  lbCount.textContent = `${lbIndex + 1} / ${lbImages.length}`;
+  lb.classList.add("active");
+  lbOpen = true;
+  updateNavVisibility();
+}
+
+function closeLb(){
+  lb.classList.remove("active");
+  lbImg.src = "";
+  lbOpen = false;
+}
+
+function prevLb(){
+  if(!lbOpen || lbImages.length <= 1) return;
+  lbIndex = (lbIndex - 1 + lbImages.length) % lbImages.length;
+  openLb(lbIndex);
+}
+
+function nextLb(){
+  if(!lbOpen || lbImages.length <= 1) return;
+  lbIndex = (lbIndex + 1) % lbImages.length;
+  openLb(lbIndex);
+}
+
+function updateNavVisibility(){
+  const show = lbImages.length > 1;
+  lbPrev.style.display = show ? "" : "none";
+  lbNext.style.display = show ? "" : "none";
+}
+
+lbPrev.addEventListener("click", (e)=>{ e.stopPropagation(); prevLb(); });
+lbNext.addEventListener("click", (e)=>{ e.stopPropagation(); nextLb(); });
+lbClose.addEventListener("click", (e)=>{ e.stopPropagation(); closeLb(); });
+
+lb.addEventListener("click", (e)=>{
+  // close only when clicking the dark background (not the image/buttons)
+  if(e.target === lb) closeLb();
+});
+
+document.addEventListener("keydown", (e)=>{
+  if(!lbOpen) return;
+  if(e.key === "Escape") closeLb();
+  if(e.key === "ArrowLeft") prevLb();
+  if(e.key === "ArrowRight") nextLb();
+});
+
+// Swipe (mobile)
+let touchStartX = 0;
+let touchStartY = 0;
+let touching = false;
+
+lbInner.addEventListener("touchstart", (e)=>{
+  if(!lbOpen) return;
+  if(!e.touches || e.touches.length !== 1) return;
+  touching = true;
+  touchStartX = e.touches[0].clientX;
+  touchStartY = e.touches[0].clientY;
+}, { passive: true });
+
+lbInner.addEventListener("touchend", (e)=>{
+  if(!lbOpen || !touching) return;
+  touching = false;
+
+  const t = (e.changedTouches && e.changedTouches[0]) ? e.changedTouches[0] : null;
+  if(!t) return;
+
+  const dx = t.clientX - touchStartX;
+  const dy = t.clientY - touchStartY;
+
+  // ignore vertical swipes
+  if(Math.abs(dy) > Math.abs(dx)) return;
+
+  const threshold = 40;
+  if(dx > threshold) prevLb();
+  if(dx < -threshold) nextLb();
+}, { passive: true });
+
+// ===== Page load (supabase) =====
 async function load(){
   const id = getParam("id");
   if(!id){
@@ -109,19 +313,22 @@ async function load(){
 
   document.title = `${car.make} ${car.model} (${car.year}) | La Familia Team`;
 
-  const cover = document.getElementById("cover");
-  if(car.cover_url) cover.style.backgroundImage = `url('${car.cover_url}')`;
+  const coverEl = document.getElementById("cover");
+  if(car.cover_url){
+    coverEl.style.backgroundImage = `url('${car.cover_url}')`;
+  } else {
+    coverEl.style.cursor = "default";
+  }
 
   document.getElementById("title").textContent = `${car.make} ${car.model} (${car.year})`;
   const owner = car.profiles?.display_name || "—";
   document.getElementById("subtitle").textContent = `Vlasnik: ${owner}${car.location ? " • " + car.location : ""}`;
 
-  // badges (možeš proširiti kasnije)
+  // badges
   const badges = [];
   if(car.setup) badges.push(car.setup);
   if(car.transmission) badges.push(car.transmission);
   if(car.engine) badges.push(car.engine);
-
   document.getElementById("badges").innerHTML = badges.map(b=>`<span class="badge">${esc(b)}</span>`).join("");
 
   // specs
@@ -156,7 +363,7 @@ async function load(){
         <div class="small">${esc(u.date)}</div>
         <h3>${esc(u.title)}</h3>
         ${u.body ? `<p>${esc(u.body)}</p>` : ""}
-        ${u.image_url ? `<img class="uimg" src="${u.image_url}" alt="">` : ""}
+        ${u.image_url ? `<img class="uimg" data-lb-url="${esc(u.image_url)}" src="${esc(u.image_url)}" alt="Update slika">` : ""}
       </div>
     `).join("");
   }
@@ -175,9 +382,45 @@ async function load(){
     galleryRoot.innerHTML = `<div class="small">Galerija je prazna.</div>`;
   } else {
     galleryRoot.innerHTML = pics.map(p=>`
-      <div class="photo" style="background-image:url('${p.url}')"></div>
+      <div class="photo" data-lb-url="${esc(p.url)}" style="background-image:url('${esc(p.url)}')"></div>
     `).join("");
   }
+
+  // Build a unified list for lightbox navigation:
+  // order: cover (if any) + gallery (newest first) + update images (newest first)
+  const coverUrl = car.cover_url ? [car.cover_url] : [];
+  const galleryUrls = (pics || []).map(p => p.url).filter(Boolean);
+  const updateUrls = (updates || []).map(u => u.image_url).filter(Boolean);
+
+  lbImages = [...coverUrl, ...galleryUrls, ...updateUrls].filter(Boolean);
+
+  // Click handlers
+  if(car.cover_url){
+    coverEl.addEventListener("click", () => {
+      // cover is index 0 in lbImages if it exists
+      openLb(0);
+    });
+  }
+
+  // Gallery click: find index in lbImages
+  galleryRoot.querySelectorAll(".photo").forEach(el=>{
+    el.addEventListener("click", ()=>{
+      const url = el.getAttribute("data-lb-url");
+      const idx = lbImages.indexOf(url);
+      openLb(idx >= 0 ? idx : 0);
+    });
+  });
+
+  // Update images click
+  updatesRoot.querySelectorAll(".uimg").forEach(el=>{
+    el.addEventListener("click", ()=>{
+      const url = el.getAttribute("data-lb-url");
+      const idx = lbImages.indexOf(url);
+      openLb(idx >= 0 ? idx : 0);
+    });
+  });
+
+  updateNavVisibility();
 }
 
 load();
