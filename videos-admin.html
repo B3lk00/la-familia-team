@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="bs">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Video Admin | La Familia</title>
+
+<style>
+:root{--bg:#0f1117;--card:#1c1f2a;--line:#2a2f3d;--muted:#a7adbb;--acc:#ff2e63;}
+*{box-sizing:border-box}
+body{margin:0;font-family:'Segoe UI',sans-serif;background:var(--bg);color:#fff}
+.navbar{display:flex;justify-content:space-between;align-items:center;padding:18px 32px;background:rgba(0,0,0,.55);backdrop-filter:blur(10px);position:sticky;top:0;border-bottom:1px solid var(--line)}
+.logo{font-weight:800;letter-spacing:1px}
+.navbar a,.navbar button{color:#fff;text-decoration:none;margin-left:18px;font-weight:600;opacity:.9;background:none;border:0;cursor:pointer}
+.navbar a:hover,.navbar button:hover{opacity:1}
+
+.wrap{max-width:1100px;margin:auto;padding:22px}
+.card{background:rgba(28,31,42,.85);border:1px solid var(--line);border-radius:16px;padding:14px}
+.small{color:var(--muted);font-size:13px}
+
+input,select{
+  width:100%;
+  padding:12px 14px;
+  border-radius:12px;
+  border:1px solid var(--line);
+  background:#0b0d12;
+  color:#fff
+}
+
+.btn{
+  display:inline-block;
+  padding:10px 14px;
+  border-radius:12px;
+  border:0;
+  background:var(--acc);
+  color:#fff;
+  font-weight:800;
+  cursor:pointer
+}
+
+.btn:disabled{opacity:.6;cursor:not-allowed}
+
+.grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(320px,1fr));
+  gap:14px;
+  margin-top:14px
+}
+
+.table{
+  width:100%;
+  border-collapse:collapse;
+  margin-top:10px
+}
+
+.table th,.table td{
+  border-bottom:1px solid var(--line);
+  padding:10px 8px;
+  text-align:left;
+  font-size:13px
+}
+
+.table th{color:var(--muted);font-weight:700}
+
+.iconBtn{
+  border:1px solid var(--line);
+  background:rgba(0,0,0,.25);
+  color:#fff;
+  border-radius:12px;
+  padding:8px 10px;
+  cursor:pointer
+}
+
+.iconBtn:hover{border-color:rgba(255,46,99,.6)}
+
+.badge{
+  display:inline-block;
+  padding:6px 10px;
+  border:1px solid var(--line);
+  border-radius:999px;
+  color:var(--muted);
+  font-size:12px
+}
+</style>
+</head>
+<body>
+
+<header class="navbar">
+  <div class="logo">LA FAMILIA TEAM</div>
+  <nav>
+    <a href="index.html">Početna</a>
+    <a href="garaza.html">Garaža</a>
+    <a href="panel.html">Panel</a>
+    <a href="videos-admin.html">Video Admin</a>
+    <button onclick="logout()">Logout</button>
+  </nav>
+</header>
+
+<div class="wrap">
+  <h1 style="margin:0 0 6px">Video Admin</h1>
+  <div id="status" class="small">Učitavam…</div>
+
+  <div class="grid">
+    <div class="card">
+      <h2 style="margin:0 0 10px">Dodaj video</h2>
+
+      <div class="small">
+        YouTube radi 100%. Instagram i TikTok embed su "best effort".
+      </div>
+
+      <div style="display:grid; gap:10px; margin-top:10px">
+        <input id="v_title" placeholder="Naslov (npr. La Familia Cruise)" />
+        <input id="v_url" placeholder="Zalijepi YouTube / Instagram / TikTok link..." />
+        <select id="v_source">
+          <option value="youtube">YouTube</option>
+          <option value="instagram">Instagram</option>
+          <option value="tiktok">TikTok</option>
+        </select>
+        <button class="btn" id="v_btn" onclick="addVideo()">Objavi</button>
+        <div id="v_msg" class="small"></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2 style="margin:0 0 10px">Objavljeni videi</h2>
+      <div id="list" class="small">—</div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase.js"></script>
+<script src="auth-guard.js"></script>
+
+<script>
+let session=null, me=null;
+
+function esc(s){
+  return String(s??"")
+    .replaceAll("&","&amp;")
+    .replaceAll("<","&lt;")
+    .replaceAll(">","&gt;");
+}
+
+async function logout(){
+  await window.sb.auth.signOut();
+  location.href="login.html";
+}
+
+// ===== YOUTUBE =====
+function ytToEmbed(url){
+  const u = (url||"").trim();
+  const m1 = u.match(/youtu\.be\/([a-zA-Z0-9_-]{6,})/);
+  if(m1) return `https://www.youtube.com/embed/${m1[1]}`;
+  const m2 = u.match(/[?&]v=([a-zA-Z0-9_-]{6,})/);
+  if(m2) return `https://www.youtube.com/embed/${m2[1]}`;
+  const m3 = u.match(/youtube\.com\/embed\/([a-zA-Z0-9_-]{6,})/);
+  if(m3) return `https://www.youtube.com/embed/${m3[1]}`;
+  return null;
+}
+
+// ===== INSTAGRAM =====
+function igToEmbed(url){
+  const u = (url||"").trim();
+  const m = u.match(/instagram\.com\/(reel|p)\/([^\/\?\#]+)\//);
+  if(m) return `https://www.instagram.com/${m[1]}/${m[2]}/embed`;
+  return null;
+}
+
+// ===== TIKTOK =====
+function tiktokToEmbed(url){
+  const u = (url||"").trim();
+  const m = u.match(/tiktok\.com\/@[^\/]+\/video\/(\d+)/);
+  if(m){
+    return `https://www.tiktok.com/embed/v2/${m[1]}`;
+  }
+  return null;
+}
+
+async function init(){
+  session = await window.requireAuth();
+  if(!session) return;
+
+  const { data: prof, error } = await window.sb
+    .from("profiles")
+    .select("id, display_name, role")
+    .eq("id", session.user.id)
+    .single();
+
+  if(error){
+    document.getElementById("status").textContent = "Greška: "+error.message;
+    return;
+  }
+
+  me = prof;
+
+  if(me.role !== "admin"){
+    document.getElementById("status").innerHTML =
+      `Nemaš admin prava. <span class="badge">role=${esc(me.role)}</span>`;
+    document.getElementById("v_btn").disabled = true;
+    return;
+  }
+
+  document.getElementById("status").innerHTML =
+    `Admin: <span class="badge">${esc(me.display_name)}</span>`;
+
+  await loadList();
+}
+
+async function addVideo(){
+  const msg = document.getElementById("v_msg");
+  msg.textContent = "";
+
+  const title = document.getElementById("v_title").value.trim() || null;
+  const url = document.getElementById("v_url").value.trim();
+  const source = document.getElementById("v_source").value;
+
+  if(!url){
+    msg.textContent = "Zalijepi link.";
+    return;
+  }
+
+  let embed_url = null;
+
+  if(source === "youtube") embed_url = ytToEmbed(url);
+  if(source === "instagram") embed_url = igToEmbed(url);
+  if(source === "tiktok") embed_url = tiktokToEmbed(url);
+
+  if(!embed_url){
+    msg.textContent = "Ne prepoznajem link format.";
+    return;
+  }
+
+  document.getElementById("v_btn").disabled = true;
+  msg.textContent = "Objavljujem…";
+
+  const { error } = await window.sb.from("videos").insert({
+    created_by: me.id,
+    title,
+    source,
+    url,
+    embed_url,
+    is_published: true
+  });
+
+  document.getElementById("v_btn").disabled = false;
+
+  if(error){
+    msg.textContent = "Greška: " + error.message;
+    return;
+  }
+
+  msg.textContent = "Objavljeno ✅";
+  document.getElementById("v_title").value = "";
+  document.getElementById("v_url").value = "";
+  document.getElementById("v_source").value = "youtube";
+
+  await loadList();
+}
+
+async function loadList(){
+  const root = document.getElementById("list");
+  root.innerHTML = `<div class="small">Učitavam…</div>`;
+
+  const { data, error } = await window.sb
+    .from("videos")
+    .select("id, created_at, title, source")
+    .order("created_at", { ascending: false });
+
+  if(error){
+    root.innerHTML = `<div class="small">Greška: ${esc(error.message)}</div>`;
+    return;
+  }
+
+  if(!data || !data.length){
+    root.innerHTML = `<div class="small">Nema videa.</div>`;
+    return;
+  }
+
+  root.innerHTML = `
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Naslov</th>
+          <th>Source</th>
+          <th>Vrijeme</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        ${data.map(v=>`
+          <tr>
+            <td>${esc(v.title || "(bez naslova)")}</td>
+            <td>${esc(v.source)}</td>
+            <td class="small">${esc(new Date(v.created_at).toLocaleString())}</td>
+            <td style="text-align:right">
+              <button class="iconBtn" onclick="del('${v.id}')">Obriši</button>
+            </td>
+          </tr>
+        `).join("")}
+      </tbody>
+    </table>
+  `;
+}
+
+async function del(id){
+  if(!confirm("Obrisati video?")) return;
+  const { error } = await window.sb.from("videos").delete().eq("id", id);
+  if(error){ alert(error.message); return; }
+  await loadList();
+}
+
+init();
+</script>
+
+</body>
+</html>
