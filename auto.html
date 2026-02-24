@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Audi A5 2014 | La Familia Team</title>
+<title>Auto | La Familia Team</title>
 <style>
 :root{--bg:#0f1117;--card:#1c1f2a;--muted:#a7adbb;--acc:#ff2e63;--line:#2a2f3d;}
 *{box-sizing:border-box}
@@ -13,25 +13,24 @@ body{margin:0;font-family:'Segoe UI',sans-serif;background:var(--bg);color:#fff}
 .navbar a{color:#fff;text-decoration:none;margin-left:18px;font-weight:600;opacity:.9}
 .navbar a:hover{opacity:1}
 .wrap{max-width:1100px;margin:auto;padding:22px}
-.hero{
-  border:1px solid var(--line);border-radius:18px;overflow:hidden;
-  background: linear-gradient(135deg, rgba(255,46,99,.15), rgba(0,190,255,.10)), #141827;
-}
-.cover{height:320px;background:linear-gradient(135deg,#2a2f3d,#141827)}
+.hero{border:1px solid var(--line);border-radius:18px;overflow:hidden;background: linear-gradient(135deg, rgba(255,46,99,.15), rgba(0,190,255,.10)), #141827;}
+.cover{height:340px;background:linear-gradient(135deg,#2a2f3d,#141827);background-size:cover;background-position:center}
 .herotxt{padding:14px 16px}
 .small{color:var(--muted);font-size:13px}
 .specs{margin-top:14px;display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:10px}
 .spec{border:1px solid var(--line);border-radius:16px;padding:12px;background:rgba(28,31,42,.75)}
 .spec .k{color:var(--muted);font-size:12px}
-.spec .v{margin-top:6px;font-weight:700}
+.spec .v{margin-top:6px;font-weight:900}
 .section{margin-top:22px}
 .card{border:1px solid var(--line);border-radius:16px;padding:14px;background:rgba(28,31,42,.75)}
-.updates{display:grid;gap:10px}
+.updates{display:grid;gap:10px;margin-top:10px}
 .update h3{margin:6px 0 4px}
 .update p{margin:8px 0 0;color:#d7dbe6}
+.uimg{width:100%;height:240px;object-fit:cover;border-radius:14px;margin-top:10px;border:1px solid var(--line)}
 .badges{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
 .badge{border:1px solid var(--line);border-radius:999px;padding:6px 10px;color:var(--muted);font-size:12px}
-.btn{display:inline-block;padding:10px 14px;border-radius:10px;background:var(--acc);color:#fff;text-decoration:none;font-weight:800;font-size:13px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin-top:10px}
+.photo{height:180px;border-radius:16px;border:1px solid var(--line);background:#0f1118 center/cover no-repeat}
 .footer{text-align:center;padding:26px;color:#80879a;border-top:1px solid var(--line);margin-top:30px}
 </style>
 </head>
@@ -42,6 +41,7 @@ body{margin:0;font-family:'Segoe UI',sans-serif;background:var(--bg);color:#fff}
   <nav>
     <a href="index.html">Početna</a>
     <a href="garaza.html">Garaža</a>
+    <a href="login.html">Login</a>
   </nav>
 </header>
 
@@ -49,52 +49,138 @@ body{margin:0;font-family:'Segoe UI',sans-serif;background:var(--bg);color:#fff}
   <a class="small" href="garaza.html">← nazad na garažu</a>
 
   <section class="hero" style="margin-top:10px">
-    <div class="cover"></div>
+    <div id="cover" class="cover"></div>
     <div class="herotxt">
-      <h1 style="margin:0 0 6px">Audi A5 Facelift (2014)</h1>
-      <div class="small">Vlasnik: Amar • Sarajevo</div>
-      <div class="badges">
-        <span class="badge">Stage 1</span>
-        <span class="badge">S-tronic</span>
-        <span class="badge">2.0 TDI</span>
-      </div>
+      <h1 id="title" style="margin:0 0 6px">Učitavam…</h1>
+      <div id="subtitle" class="small">—</div>
+      <div id="badges" class="badges"></div>
     </div>
   </section>
 
-  <section class="specs">
-    <div class="spec"><div class="k">Motor</div><div class="v">2.0 TDI CR</div></div>
-    <div class="spec"><div class="k">Snaga</div><div class="v">210 KS</div></div>
-    <div class="spec"><div class="k">Mjenjač</div><div class="v">S-tronic</div></div>
-    <div class="spec"><div class="k">Setup</div><div class="v">Ovjes -30mm</div></div>
-  </section>
+  <section id="specs" class="specs"></section>
 
   <section class="section">
     <div class="card">
       <h2 style="margin:0 0 6px">Build log</h2>
       <div class="small">Update-i idu od najnovijeg ka starijim.</div>
     </div>
+    <div id="updates" class="updates"></div>
+  </section>
 
-    <div class="updates" style="margin-top:10px">
-      <div class="card update">
-        <div class="small">12.06.2026</div>
-        <h3>Eibach opruge (-30mm)</h3>
-        <p>Auto stabilniji u krivinama, stance bolji, udobnost okej.</p>
-      </div>
-
-      <div class="card update">
-        <div class="small">15.05.2026</div>
-        <h3>Stage 1 + EGR off</h3>
-        <p>Bolji odziv, jači poteg, potrošnja malo niža u normalnoj vožnji.</p>
-      </div>
+  <section class="section">
+    <div class="card">
+      <h2 style="margin:0">Galerija</h2>
+      <div class="small">Slike koje je vlasnik dodao.</div>
     </div>
-
-    <div style="margin-top:14px">
-      <a class="btn" href="#">Dodaj update (kasnije)</a>
-    </div>
+    <div id="gallery" class="grid"></div>
   </section>
 </div>
 
-
 <footer class="footer">© 2026 La Familia Team</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase.js"></script>
+
+<script>
+function getParam(name){
+  const url = new URL(window.location.href);
+  return url.searchParams.get(name);
+}
+function esc(s){ return String(s ?? "").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;"); }
+
+async function load(){
+  const id = getParam("id");
+  if(!id){
+    document.getElementById("title").textContent = "Nema ID auta.";
+    return;
+  }
+
+  // auto + owner name
+  const { data: car, error: ce } = await window.sb
+    .from("cars")
+    .select("*, profiles(display_name)")
+    .eq("id", id)
+    .single();
+
+  if(ce){
+    document.getElementById("title").textContent = "Greška: " + ce.message;
+    return;
+  }
+
+  document.title = `${car.make} ${car.model} (${car.year}) | La Familia Team`;
+
+  const cover = document.getElementById("cover");
+  if(car.cover_url) cover.style.backgroundImage = `url('${car.cover_url}')`;
+
+  document.getElementById("title").textContent = `${car.make} ${car.model} (${car.year})`;
+  const owner = car.profiles?.display_name || "—";
+  document.getElementById("subtitle").textContent = `Vlasnik: ${owner}${car.location ? " • " + car.location : ""}`;
+
+  // badges (možeš proširiti kasnije)
+  const badges = [];
+  if(car.setup) badges.push(car.setup);
+  if(car.transmission) badges.push(car.transmission);
+  if(car.engine) badges.push(car.engine);
+
+  document.getElementById("badges").innerHTML = badges.map(b=>`<span class="badge">${esc(b)}</span>`).join("");
+
+  // specs
+  const specItems = [
+    ["Motor", car.engine || "—"],
+    ["Snaga", car.power_hp ? `${car.power_hp} KS` : "—"],
+    ["Mjenjač", car.transmission || "—"],
+    ["Setup", car.setup || "—"]
+  ];
+  document.getElementById("specs").innerHTML = specItems.map(([k,v])=>`
+    <div class="spec">
+      <div class="k">${esc(k)}</div>
+      <div class="v">${esc(v)}</div>
+    </div>
+  `).join("");
+
+  // updates
+  const { data: updates, error: ue } = await window.sb
+    .from("updates")
+    .select("*")
+    .eq("car_id", car.id)
+    .order("date", { ascending: false });
+
+  const updatesRoot = document.getElementById("updates");
+  if(ue){
+    updatesRoot.innerHTML = `<div class="card"><div class="small">Greška: ${esc(ue.message)}</div></div>`;
+  } else if(!updates || updates.length === 0){
+    updatesRoot.innerHTML = `<div class="card"><div class="small">Nema update-a još.</div></div>`;
+  } else {
+    updatesRoot.innerHTML = updates.map(u=>`
+      <div class="card update">
+        <div class="small">${esc(u.date)}</div>
+        <h3>${esc(u.title)}</h3>
+        ${u.body ? `<p>${esc(u.body)}</p>` : ""}
+        ${u.image_url ? `<img class="uimg" src="${u.image_url}" alt="">` : ""}
+      </div>
+    `).join("");
+  }
+
+  // gallery
+  const { data: pics, error: ge } = await window.sb
+    .from("gallery_images")
+    .select("*")
+    .eq("car_id", car.id)
+    .order("created_at", { ascending: false });
+
+  const galleryRoot = document.getElementById("gallery");
+  if(ge){
+    galleryRoot.innerHTML = `<div class="small">Greška: ${esc(ge.message)}</div>`;
+  } else if(!pics || pics.length === 0){
+    galleryRoot.innerHTML = `<div class="small">Galerija je prazna.</div>`;
+  } else {
+    galleryRoot.innerHTML = pics.map(p=>`
+      <div class="photo" style="background-image:url('${p.url}')"></div>
+    `).join("");
+  }
+}
+
+load();
+</script>
 </body>
 </html>
