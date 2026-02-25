@@ -277,12 +277,11 @@ async function loadVideos(){
       <div class="videoThumb">
 <iframe
   src="${v.embed_url}"
-  scrolling="no"
-  referrerpolicy="no-referrer"
-  sandbox="allow-scripts allow-same-origin allow-presentation allow-popups"
-  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-  allowfullscreen
   loading="lazy"
+  allowfullscreen
+  scrolling="no"
+  referrerpolicy="strict-origin-when-cross-origin"
+  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
   title="${esc(v.title || "Video")}"
 ></iframe>
       </div>
