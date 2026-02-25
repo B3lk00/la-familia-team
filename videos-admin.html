@@ -18,7 +18,7 @@ body{margin:0;font-family:'Segoe UI',sans-serif;background:var(--bg);color:#fff}
 .card{background:rgba(28,31,42,.85);border:1px solid var(--line);border-radius:16px;padding:14px}
 .small{color:var(--muted);font-size:13px}
 
-input,select{
+input{
   width:100%;
   padding:12px 14px;
   border-radius:12px;
@@ -105,17 +105,12 @@ input,select{
       <h2 style="margin:0 0 10px">Dodaj video</h2>
 
       <div class="small">
-        YouTube radi 100%. Instagram i TikTok embed su "best effort".
+        Zalijepi link (YouTube/Shorts, Instagram Reel, TikTok) — sistem sam prepozna platformu.
       </div>
 
       <div style="display:grid; gap:10px; margin-top:10px">
-        <input id="v_title" placeholder="Naslov (npr. La Familia Cruise)" />
+        <input id="v_title" placeholder="Naslov (opciono)" />
         <input id="v_url" placeholder="Zalijepi YouTube / Instagram / TikTok link..." />
-        <select id="v_source">
-          <option value="youtube">YouTube</option>
-          <option value="instagram">Instagram</option>
-          <option value="tiktok">TikTok</option>
-        </select>
         <button class="btn" id="v_btn" onclick="addVideo()">Objavi</button>
         <div id="v_msg" class="small"></div>
       </div>
@@ -147,21 +142,32 @@ async function logout(){
   location.href="login.html";
 }
 
-// ===== YOUTUBE =====
+// ===== YOUTUBE (uključuje Shorts) =====
 function ytToEmbed(url){
-  const u = (url||"").trim();
-  const m1 = u.match(/youtu\.be\/([a-zA-Z0-9_-]{6,})/);
-  if(m1) return `https://www.youtube.com/embed/${m1[1]}`;
-  const m2 = u.match(/[?&]v=([a-zA-Z0-9_-]{6,})/);
-  if(m2) return `https://www.youtube.com/embed/${m2[1]}`;
-  const m3 = u.match(/youtube\.com\/embed\/([a-zA-Z0-9_-]{6,})/);
-  if(m3) return `https://www.youtube.com/embed/${m3[1]}`;
+  const u = (url || "").trim();
+
+  // youtu.be/ID
+  let m = u.match(/youtu\.be\/([a-zA-Z0-9_-]{6,})/);
+  if(m) return `https://www.youtube.com/embed/${m[1]}`;
+
+  // youtube.com/watch?v=ID
+  m = u.match(/[?&]v=([a-zA-Z0-9_-]{6,})/);
+  if(m) return `https://www.youtube.com/embed/${m[1]}`;
+
+  // ✅ youtube.com/shorts/ID
+  m = u.match(/youtube\.com\/shorts\/([a-zA-Z0-9_-]{6,})/);
+  if(m) return `https://www.youtube.com/embed/${m[1]}`;
+
+  // youtube.com/embed/ID
+  m = u.match(/youtube\.com\/embed\/([a-zA-Z0-9_-]{6,})/);
+  if(m) return `https://www.youtube.com/embed/${m[1]}`;
+
   return null;
 }
 
-// ===== INSTAGRAM =====
+// ===== INSTAGRAM (best effort) =====
 function igToEmbed(url){
-  const u = (url||"").trim();
+  const u = (url || "").trim();
   const m = u.match(/instagram\.com\/(reel|p)\/([^\/\?\#]+)\//);
   if(m) return `https://www.instagram.com/${m[1]}/${m[2]}/embed`;
   return null;
@@ -169,11 +175,23 @@ function igToEmbed(url){
 
 // ===== TIKTOK =====
 function tiktokToEmbed(url){
-  const u = (url||"").trim();
+  const u = (url || "").trim();
   const m = u.match(/tiktok\.com\/@[^\/]+\/video\/(\d+)/);
-  if(m){
-    return `https://www.tiktok.com/embed/v2/${m[1]}`;
-  }
+  if(m) return `https://www.tiktok.com/embed/v2/${m[1]}`;
+  return null;
+}
+
+// ===== AUTO DETECT =====
+function detectSourceAndEmbed(url){
+  const yt = ytToEmbed(url);
+  if(yt) return { source: "youtube", embed_url: yt };
+
+  const ig = igToEmbed(url);
+  if(ig) return { source: "instagram", embed_url: ig };
+
+  const tt = tiktokToEmbed(url);
+  if(tt) return { source: "tiktok", embed_url: tt };
+
   return null;
 }
 
@@ -213,23 +231,19 @@ async function addVideo(){
 
   const title = document.getElementById("v_title").value.trim() || null;
   const url = document.getElementById("v_url").value.trim();
-  const source = document.getElementById("v_source").value;
 
   if(!url){
     msg.textContent = "Zalijepi link.";
     return;
   }
 
-  let embed_url = null;
-
-  if(source === "youtube") embed_url = ytToEmbed(url);
-  if(source === "instagram") embed_url = igToEmbed(url);
-  if(source === "tiktok") embed_url = tiktokToEmbed(url);
-
-  if(!embed_url){
-    msg.textContent = "Ne prepoznajem link format.";
+  const detected = detectSourceAndEmbed(url);
+  if(!detected){
+    msg.textContent = "Ne prepoznajem link. Podržano: YouTube (i Shorts), Instagram Reel, TikTok.";
     return;
   }
+
+  const { source, embed_url } = detected;
 
   document.getElementById("v_btn").disabled = true;
   msg.textContent = "Objavljujem…";
@@ -250,10 +264,9 @@ async function addVideo(){
     return;
   }
 
-  msg.textContent = "Objavljeno ✅";
+  msg.textContent = `Objavljeno ✅ (${source})`;
   document.getElementById("v_title").value = "";
   document.getElementById("v_url").value = "";
-  document.getElementById("v_source").value = "youtube";
 
   await loadList();
 }
